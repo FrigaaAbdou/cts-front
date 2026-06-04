@@ -1,0 +1,219 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+@import "@fontsource-variable/geist";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: #fffaf9;
+  color: #101828;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+@layer base {
+  .theme {
+    --font-heading: var(--font-sans);
+    --font-sans: 'Geist Variable', sans-serif;
+  }
+  :root {
+    --background: 12 100% 99%;
+    --foreground: 224 32% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 32% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 32% 10%;
+    --primary: 354 100% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 10 60% 97%;
+    --secondary-foreground: 224 32% 10%;
+    --muted: 10 60% 97%;
+    --muted-foreground: 220 9% 38%;
+    --accent: 10 60% 95%;
+    --accent-foreground: 224 32% 10%;
+    --destructive: 0 84% 60%;
+    --border: 8 30% 90%;
+    --input: 8 30% 90%;
+    --ring: 354 100% 52%;
+    --chart-1: 354 100% 52%;
+    --chart-2: 354 90% 46%;
+    --chart-3: 9 70% 72%;
+    --chart-4: 140 34% 64%;
+    --chart-5: 220 10% 52%;
+    --radius: 1rem;
+    --sidebar: 0 0% 100%;
+    --sidebar-foreground: 224 32% 10%;
+    --sidebar-primary: 354 100% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 10 60% 97%;
+    --sidebar-accent-foreground: 224 32% 10%;
+    --sidebar-border: 8 30% 90%;
+    --sidebar-ring: 354 100% 52%;
+  }
+  .dark {
+    --background: 224 32% 10%;
+    --foreground: 0 0% 98%;
+    --card: 224 27% 14%;
+    --card-foreground: 0 0% 98%;
+    --popover: 224 27% 14%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 354 100% 62%;
+    --primary-foreground: 224 32% 10%;
+    --secondary: 224 16% 22%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 224 16% 22%;
+    --muted-foreground: 220 10% 72%;
+    --accent: 224 16% 22%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 70% 52%;
+    --border: 224 16% 22%;
+    --input: 224 16% 22%;
+    --ring: 354 100% 62%;
+    --chart-1: 354 100% 62%;
+    --chart-2: 354 92% 56%;
+    --chart-3: 10 65% 72%;
+    --chart-4: 140 30% 58%;
+    --chart-5: 220 10% 72%;
+    --sidebar: 224 27% 14%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 354 100% 62%;
+    --sidebar-primary-foreground: 224 32% 10%;
+    --sidebar-accent: 224 16% 22%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 224 16% 22%;
+    --sidebar-ring: 354 100% 62%;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer components {
+  .motion-reveal {
+    --reveal-delay: 0ms;
+    opacity: 0;
+    transform: translate3d(0, 2rem, 0) scale(1);
+    transition:
+      opacity 620ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay),
+      transform 720ms cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay);
+    will-change: opacity, transform;
+  }
+
+  .motion-reveal[data-reveal-variant="fade-scale"] {
+    transform: translate3d(0, 1rem, 0) scale(0.985);
+  }
+
+  .motion-reveal[data-reveal-variant="slide-left"] {
+    transform: translate3d(2.5rem, 1rem, 0) scale(1);
+  }
+
+  .motion-reveal[data-reveal-variant="slide-right"] {
+    transform: translate3d(-2.5rem, 1rem, 0) scale(1);
+  }
+
+  .motion-reveal[data-reveal-active="true"] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+
+  .motion-reveal[data-stagger="true"] :where(article, li) {
+    opacity: 0;
+    transform: translate3d(0, 1.15rem, 0);
+    transition:
+      opacity 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      transform 620ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"]
+    :where(article, li) {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"]
+    :where(article, li):nth-child(1) {
+    transition-delay: 90ms;
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"]
+    :where(article, li):nth-child(2) {
+    transition-delay: 150ms;
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"]
+    :where(article, li):nth-child(3) {
+    transition-delay: 210ms;
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"]
+    :where(article, li):nth-child(4) {
+    transition-delay: 270ms;
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"]
+    :where(article, li):nth-child(n + 5) {
+    transition-delay: 330ms;
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"] article {
+    transition-property: opacity, transform, box-shadow;
+  }
+
+  .motion-reveal[data-reveal-active="true"][data-stagger="true"] article:hover {
+    transform: translate3d(0, -0.35rem, 0);
+  }
+
+  .chatbot-panel-enter {
+    transform-origin: bottom right;
+    animation: chatbot-panel-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    .motion-reveal,
+    .motion-reveal[data-stagger="true"] :where(article, li) {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+
+    .chatbot-panel-enter {
+      animation: none;
+    }
+  }
+}
+
+@keyframes chatbot-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(1rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

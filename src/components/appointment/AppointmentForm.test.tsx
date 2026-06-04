@@ -1,0 +1,653 @@
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+
+import { AppointmentForm } from "@/components/appointment/AppointmentForm";
+
+vi.mock("@/lib/api/campaignApi", () => ({
+  getActiveCampaigns: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/lib/api/appointmentApi", async () => {
+  const actual = await vi.importActual<typeof import("@/lib/api/appointmentApi")>(
+    "@/lib/api/appointmentApi",
+  );
+
+  return {
+    ...actual,
+    getAppointmentFormMeta: vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        locales: ["fr", "ar"],
+        genders: [
+          { value: "male", label: "Homme" },
+          { value: "female", label: "Femme" },
+        ],
+        bloodGroups: ["A+", "O+"],
+        donationTypes: [
+          { value: "whole_blood", label: "Don de sang total" },
+          { value: "plasma", label: "Don de plasma" },
+        ],
+        wilayas: [
+          { code: "16", label: "Alger" },
+          { code: "09", label: "Blida" },
+        ],
+        communesByWilaya: {
+          "16": ["Sidi M'Hamed", "Bab El Oued"],
+          "09": ["Blida"],
+        },
+        eligibilityChecklistTemplate: [],
+      },
+      message: "ok",
+    }),
+    getAppointmentSlots: vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        date: "2026-06-10",
+        slots: [{ value: "08:00", label: "08:00", isAvailable: true }],
+      },
+      message: "ok",
+    }),
+    createAppointmentRequest: vi.fn(),
+  };
+});
+
+async function unlockForm(user: ReturnType<typeof userEvent.setup>) {
+  await user.click(screen.getByLabelText("Âge entre 18 et 65 ans"));
+  await user.click(screen.getByLabelText("Poids minimum 50 kg"));
+  await user.click(screen.getByLabelText("Être en bonne santé"));
+  await user.click(screen.getByLabelText("Aucune contre-indication au don"));
+  await user.click(screen.getByRole("button", { name: "Prendre rendez-vous" }));
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  if (typeof window.localStorage?.removeItem === "function") {
+    window.localStorage.removeItem("cts-app-locale");
+  }
+});
+
+async function fillValidAppointmentForm(user: ReturnType<typeof userEvent.setup>) {
+  const lastNameInput = document.querySelector(
+    'input[name="lastName"]',
+  ) as HTMLInputElement;
+  const firstNameInput = document.querySelector(
+    'input[name="firstName"]',
+  ) as HTMLInputElement;
+  const birthDateInput = document.querySelector(
+    'input[name="birthDate"]',
+  ) as HTMLInputElement;
+  const phoneInput = document.querySelector(
+    'input[name="phone"]',
+  ) as HTMLInputElement;
+  const wilayaSelect = document.querySelector(
+    'select[name="wilayaCode"]',
+  ) as HTMLSelectElement;
+  const communeSelect = document.querySelector(
+    'select[name="commune"]',
+  ) as HTMLSelectElement;
+  const appointmentDateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const appointmentTimeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+  const bloodGroupSelect = document.querySelector(
+    'select[name="bloodGroup"]',
+  ) as HTMLSelectElement;
+  const donationTypeSelect = document.querySelector(
+    'select[name="donationType"]',
+  ) as HTMLSelectElement;
+
+  await user.type(lastNameInput, "Dupont");
+  await user.type(firstNameInput, "Nadia");
+  fireEvent.change(birthDateInput, { target: { value: "1995-01-10" } });
+  await user.type(phoneInput, "0550123456");
+  await user.selectOptions(wilayaSelect, "16");
+  await user.selectOptions(communeSelect, "Sidi M'Hamed");
+  fireEvent.change(appointmentDateInput, { target: { value: "2026-06-10" } });
+  await screen.findByRole("option", { name: "08:00" });
+  await user.selectOptions(appointmentTimeSelect, "08:00");
+  await user.selectOptions(bloodGroupSelect, "A+");
+  await user.selectOptions(donationTypeSelect, "whole_blood");
+}
+
+test("shows validation errors when required fields are missing", async () => {
+  const user = userEvent.setup();
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const scrollIntoViewSpy = vi.spyOn(Element.prototype, "scrollIntoView");
+
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(await screen.findByText("Le nom est requis.")).toBeInTheDocument();
+  expect(screen.getByText("Le prénom est requis.")).toBeInTheDocument();
+  expect(
+    screen.getByText("La date du rendez-vous est requise."),
+  ).toBeInTheDocument();
+  expect(screen.getByText("Champs à corriger")).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Nom" })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Prénom" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Date de rendez-vous" }),
+  ).toBeInTheDocument();
+  await waitFor(() => expect(scrollIntoViewSpy).toHaveBeenCalled());
+});
+
+test("rejects a donor younger than 18", async () => {
+  const user = userEvent.setup();
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const birthDateInput = document.querySelector(
+    'input[name="birthDate"]',
+  ) as HTMLInputElement;
+
+  fireEvent.change(birthDateInput, { target: { value: "2010-06-01" } });
+
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByText(
+      "Vous devez avoir au moins 18 ans pour faire une demande de rendez-vous.",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("hydrates metadata-driven options after eligibility gate unlock", async () => {
+  const user = userEvent.setup();
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  expect(await screen.findByText("Alger")).toBeInTheDocument();
+  expect(screen.getByText("Blida")).toBeInTheDocument();
+  expect(screen.getByText("Don de plasma")).toBeInTheDocument();
+});
+
+test("falls back to local metadata when the API metadata call fails", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentFormMeta } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentFormMeta).mockRejectedValueOnce(
+    new Error("metadata failure"),
+  );
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  expect(await screen.findByText("Alger")).toBeInTheDocument();
+  expect(screen.getByText("Tipaza")).toBeInTheDocument();
+});
+
+test("falls back to local metadata when the API payload shape is invalid", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentFormMeta } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentFormMeta).mockResolvedValueOnce({
+    success: true,
+    data: undefined as never,
+    message: "invalid",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  expect(await screen.findByText("Alger")).toBeInTheDocument();
+  expect(screen.getByText("Tipaza")).toBeInTheDocument();
+});
+
+test("loads appointment slots from the API once a date is selected", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentSlots } = await import("@/lib/api/appointmentApi");
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const dateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const timeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+
+  expect(timeSelect).toBeDisabled();
+  expect(screen.getAllByText("Choisissez d'abord une date.").length).toBeGreaterThan(0);
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-10" } });
+
+  await waitFor(() =>
+    expect(getAppointmentSlots).toHaveBeenCalledWith("2026-06-10", undefined),
+  );
+
+  expect(await screen.findByRole("option", { name: "08:00" })).toBeInTheDocument();
+  expect(timeSelect).not.toBeDisabled();
+});
+
+test("resets the selected time when the appointment date changes", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentSlots } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentSlots)
+    .mockResolvedValueOnce({
+      success: true,
+      data: {
+        date: "2026-06-10",
+        slots: [{ value: "08:00", label: "08:00", isAvailable: true }],
+      },
+      message: "ok",
+    })
+    .mockResolvedValueOnce({
+      success: true,
+      data: {
+        date: "2026-06-11",
+        slots: [{ value: "09:00", label: "09:00", isAvailable: true }],
+      },
+      message: "ok",
+    });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const dateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const timeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-10" } });
+  await screen.findByRole("option", { name: "08:00" });
+  await user.selectOptions(timeSelect, "08:00");
+  expect(timeSelect.value).toBe("08:00");
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-11" } });
+
+  await waitFor(() => expect(timeSelect.value).toBe(""));
+  expect(await screen.findByRole("option", { name: "09:00" })).toBeInTheDocument();
+});
+
+test("shows an unavailable state when no appointment slots can be used", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentSlots } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentSlots).mockResolvedValueOnce({
+    success: true,
+    data: {
+      date: "2026-06-12",
+      slots: [{ value: "08:00", label: "08:00", isAvailable: false }],
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const dateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const timeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-12" } });
+
+  expect(
+    (await screen.findAllByText("Aucun créneau disponible pour cette date.")).length,
+  ).toBeGreaterThan(0);
+  expect(timeSelect).toBeDisabled();
+});
+
+test("keeps only open slots selectable when admin changes have blocked or closed others", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentSlots } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentSlots).mockResolvedValueOnce({
+    success: true,
+    data: {
+      date: "2026-06-14",
+      slots: [
+        {
+          value: "08:00",
+          label: "08:00",
+          isAvailable: true,
+          status: "open",
+        },
+        {
+          value: "09:00",
+          label: "09:00",
+          isAvailable: false,
+          status: "blocked",
+        },
+        {
+          value: "10:00",
+          label: "10:00",
+          isAvailable: false,
+          status: "closed",
+        },
+      ],
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const dateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const timeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-14" } });
+
+  await screen.findByRole("option", { name: "08:00" });
+
+  expect(screen.getByRole("option", { name: "08:00" })).toBeInTheDocument();
+  expect(
+    screen.queryByRole("option", { name: "09:00" }),
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("option", { name: "10:00" }),
+  ).not.toBeInTheDocument();
+  expect(timeSelect).not.toBeDisabled();
+});
+
+test("shows a recoverable message when slot loading fails", async () => {
+  const user = userEvent.setup();
+  const { getAppointmentSlots } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(getAppointmentSlots).mockRejectedValueOnce(new Error("slots failure"));
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const dateInput = document.querySelector(
+    'input[name="appointmentDate"]',
+  ) as HTMLInputElement;
+  const timeSelect = document.querySelector(
+    'select[name="appointmentTime"]',
+  ) as HTMLSelectElement;
+
+  fireEvent.change(dateInput, { target: { value: "2026-06-13" } });
+
+  expect(
+    await screen.findByText("Impossible de charger les créneaux."),
+  ).toBeInTheDocument();
+  expect(timeSelect).toBeDisabled();
+});
+
+test("submits successfully with the real backend payload shape", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockResolvedValueOnce({
+    success: true,
+    data: {
+      id: "appt-1",
+      status: "pending",
+      appointmentDate: "2026-06-10",
+      appointmentTime: "08:00",
+      createdAt: "2026-05-24T00:00:00.000Z",
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  await waitFor(() =>
+    expect(createAppointmentRequest).toHaveBeenCalledWith(
+      expect.objectContaining({
+        firstName: "Nadia",
+        lastName: "Dupont",
+        phone: "0550123456",
+        appointmentDate: "2026-06-10",
+        appointmentTime: "08:00",
+        donationType: "whole_blood",
+        locale: "fr",
+        eligibilityChecklist: {
+          ageConfirmed: true,
+          weightConfirmed: true,
+          healthyConfirmed: true,
+          noContraIndicationConfirmed: true,
+        },
+      }),
+    ),
+  );
+
+  expect(
+    await screen.findByText(
+      "Votre demande a été envoyée. Nous vous recontacterons pour confirmation.",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("shows a loading state while the request is pending", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  let resolveRequest: ((value: unknown) => void) | null = null;
+  vi.mocked(createAppointmentRequest).mockImplementationOnce(
+    () =>
+      new Promise((resolve) => {
+        resolveRequest = resolve;
+      }) as ReturnType<typeof createAppointmentRequest>,
+  );
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByRole("button", { name: "Envoi en cours..." }),
+  ).toBeDisabled();
+
+  resolveRequest?.({
+    success: true,
+    data: {
+      id: "appt-4",
+      status: "pending",
+      appointmentDate: "2026-06-10",
+      appointmentTime: "08:00",
+      createdAt: "2026-05-24T00:00:00.000Z",
+    },
+    message: "ok",
+  });
+
+  expect(
+    await screen.findByText(
+      "Votre demande a été envoyée. Nous vous recontacterons pour confirmation.",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("calls onSuccess after a successful submission", async () => {
+  const user = userEvent.setup();
+  const onSuccess = vi.fn();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockResolvedValueOnce({
+    success: true,
+    data: {
+      id: "appt-5",
+      status: "pending",
+      appointmentDate: "2026-06-10",
+      appointmentTime: "08:00",
+      createdAt: "2026-05-24T00:00:00.000Z",
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm onSuccess={onSuccess} />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  await waitFor(() =>
+    expect(onSuccess).toHaveBeenCalledWith({
+      appointmentDate: "2026-06-10",
+      appointmentTime: "08:00",
+      firstName: "Nadia",
+      lastName: "Dupont",
+    }),
+  );
+});
+
+test("does not send lastDonationDate for a non-existing donor", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockResolvedValueOnce({
+    success: true,
+    data: {
+      id: "appt-3",
+      status: "pending",
+      appointmentDate: "2026-06-10",
+      appointmentTime: "08:00",
+      createdAt: "2026-05-24T00:00:00.000Z",
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  await waitFor(() =>
+    expect(createAppointmentRequest).toHaveBeenCalledWith(
+      expect.not.objectContaining({
+        lastDonationDate: "",
+      }),
+    ),
+  );
+
+  expect(vi.mocked(createAppointmentRequest).mock.calls[0]?.[0]).toMatchObject({
+    isExistingDonor: false,
+    lastDonationDate: undefined,
+  });
+});
+
+test("maps backend 422 field errors into the form", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockRejectedValueOnce({
+    status: 422,
+    message: "Appointment request payload is invalid.",
+    fieldErrors: {
+      phone: "Ce numéro de téléphone est déjà invalide.",
+    },
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByText(
+      "Certains champs sont invalides. Vérifiez le formulaire.",
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Ce numéro de téléphone est déjà invalide."),
+  ).toBeInTheDocument();
+});
+
+test("shows a slot conflict message and marks the time field on 409", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockRejectedValueOnce({
+    status: 409,
+    code: "SLOT_UNAVAILABLE",
+    message: "Le creneau selectionne n'est plus disponible.",
+    details: {
+      appointmentTime: "Veuillez choisir un autre horaire.",
+    },
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByText(
+      "Ce créneau n'est plus disponible. Merci d'en choisir un autre.",
+    ),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByText("Veuillez choisir un autre horaire."),
+  ).toBeInTheDocument();
+});
+
+test("shows a safe generic message when the API fails unexpectedly", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockRejectedValueOnce({
+    status: 500,
+    message: "An unexpected error occurred",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByText(
+      "Le serveur a rencontré une erreur. Merci de réessayer un peu plus tard.",
+    ),
+  ).toBeInTheDocument();
+});
+
+test("clears stale success state when the user edits the form again", async () => {
+  const user = userEvent.setup();
+  const { createAppointmentRequest } = await import("@/lib/api/appointmentApi");
+
+  vi.mocked(createAppointmentRequest).mockResolvedValueOnce({
+    success: true,
+    data: {
+      id: "appt-2",
+      status: "pending",
+      appointmentDate: "2026-06-10",
+      appointmentTime: "08:00",
+      createdAt: "2026-05-24T00:00:00.000Z",
+    },
+    message: "ok",
+  });
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+  await fillValidAppointmentForm(user);
+  await user.click(screen.getByRole("button", { name: "Envoyer ma demande" }));
+
+  expect(
+    await screen.findByText(
+      "Votre demande a été envoyée. Nous vous recontacterons pour confirmation.",
+    ),
+  ).toBeInTheDocument();
+
+  const remarksInput = document.querySelector(
+    'textarea[name="remarks"]',
+  ) as HTMLTextAreaElement;
+  await user.type(remarksInput, " Nouveau commentaire");
+
+  await waitFor(() =>
+    expect(
+      screen.queryByText(
+        "Votre demande a été envoyée. Nous vous recontacterons pour confirmation.",
+      ),
+    ).not.toBeInTheDocument(),
+  );
+});
