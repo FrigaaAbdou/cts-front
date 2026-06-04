@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from "react";
 import {
   Circle,
   Loader2,
@@ -73,6 +73,8 @@ export function ChatbotWidget({ page }: ChatbotWidgetProps) {
   const launcherRef = useRef<HTMLDivElement | null>(null);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const sessionIdRef = useRef<string>(getSessionId());
+  const [visualBottomOffset, setVisualBottomOffset] = useState(0);
+  const [visualInlineOffset, setVisualInlineOffset] = useState(0);
 
   useEffect(() => {
     setMessages([
@@ -120,6 +122,51 @@ export function ChatbotWidget({ page }: ChatbotWidgetProps) {
       document.removeEventListener("pointerdown", handlePointerDown);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    function syncVisualViewportOffset() {
+      const viewport = window.visualViewport;
+
+      if (!viewport) {
+        setVisualBottomOffset(0);
+        setVisualInlineOffset(0);
+        return;
+      }
+
+      setVisualBottomOffset(
+        Math.max(0, window.innerHeight - viewport.height - viewport.offsetTop),
+      );
+      setVisualInlineOffset(
+        Math.max(0, window.innerWidth - viewport.width - viewport.offsetLeft),
+      );
+    }
+
+    syncVisualViewportOffset();
+    window.visualViewport?.addEventListener("resize", syncVisualViewportOffset);
+    window.visualViewport?.addEventListener("scroll", syncVisualViewportOffset);
+    window.addEventListener("resize", syncVisualViewportOffset);
+
+    return () => {
+      window.visualViewport?.removeEventListener(
+        "resize",
+        syncVisualViewportOffset,
+      );
+      window.visualViewport?.removeEventListener(
+        "scroll",
+        syncVisualViewportOffset,
+      );
+      window.removeEventListener("resize", syncVisualViewportOffset);
+    };
+  }, []);
+
+  const viewportOffsetStyle = {
+    "--chatbot-visual-bottom-offset": `${visualBottomOffset}px`,
+    "--chatbot-visual-inline-offset": `${visualInlineOffset}px`,
+  } as CSSProperties;
 
   async function sendMessage(rawMessage: string) {
     const message = rawMessage.trim();
@@ -175,9 +222,10 @@ export function ChatbotWidget({ page }: ChatbotWidgetProps) {
     <>
       <div
         ref={launcherRef}
+        style={viewportOffsetStyle}
+        data-chatbot-direction={direction}
         className={cn(
-          "fixed bottom-5 z-[60]",
-          direction === "rtl" ? "left-5" : "right-5",
+          "chatbot-launcher-position pointer-events-none fixed z-[100] isolate",
         )}
       >
         <Button
@@ -185,10 +233,10 @@ export function ChatbotWidget({ page }: ChatbotWidgetProps) {
           aria-label={copy.launcherLabel}
           onClick={() => setIsOpen((current) => !current)}
           className={cn(
-            "size-20 rounded-full border-0 bg-[radial-gradient(circle_at_34%_26%,#ff3d63_0%,#ff0a1f_48%,#cf0028_100%)] text-white shadow-[0_12px_22px_rgba(180,0,36,0.34),0_3px_0_rgba(255,255,255,0.16)_inset] transition hover:-translate-y-0.5 hover:shadow-[0_16px_28px_rgba(180,0,36,0.4),0_3px_0_rgba(255,255,255,0.18)_inset]",
+            "pointer-events-auto size-16 rounded-full border-0 bg-[radial-gradient(circle_at_34%_26%,#ff3d63_0%,#ff0a1f_48%,#cf0028_100%)] text-white shadow-[0_12px_22px_rgba(180,0,36,0.34),0_3px_0_rgba(255,255,255,0.16)_inset] transition hover:-translate-y-0.5 hover:shadow-[0_16px_28px_rgba(180,0,36,0.4),0_3px_0_rgba(255,255,255,0.18)_inset] sm:size-20",
           )}
         >
-          <ChatBubbleIcon className="size-10" />
+          <ChatBubbleIcon className="size-8 sm:size-10" />
           <span className="sr-only">
             {copy.launcherLabel}
           </span>
@@ -198,8 +246,10 @@ export function ChatbotWidget({ page }: ChatbotWidgetProps) {
       {isOpen ? (
         <div
           ref={panelRef}
+          style={viewportOffsetStyle}
+          data-chatbot-direction={direction}
           className={cn(
-            "chatbot-panel-enter fixed inset-x-3 bottom-28 z-50 flex max-h-[calc(100dvh-8rem)] flex-col overflow-hidden rounded-[1.75rem] border border-red-100/80 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.18)]",
+            "chatbot-panel-enter chatbot-panel-position fixed inset-x-3 z-50 flex max-h-[calc(100svh-7.5rem)] flex-col overflow-hidden rounded-[1.75rem] border border-red-100/80 bg-white shadow-[0_28px_90px_rgba(15,23,42,0.18)]",
             "sm:inset-x-auto sm:bottom-28 sm:w-[25rem] sm:max-h-[min(78dvh,40rem)]",
             direction === "rtl" ? "sm:left-5" : "sm:right-5",
           )}

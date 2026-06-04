@@ -189,6 +189,54 @@ body {
     animation: chatbot-panel-enter 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
+  .chatbot-launcher-position {
+    bottom: calc(
+      var(--chatbot-visual-bottom-offset, 0px) +
+        env(safe-area-inset-bottom) + 1rem
+    );
+    right: calc(var(--chatbot-visual-inline-offset, 0px) + 1rem);
+  }
+
+  .chatbot-launcher-position[data-chatbot-direction="rtl"] {
+    right: auto;
+    left: 1rem;
+  }
+
+  .chatbot-panel-position {
+    bottom: calc(
+      var(--chatbot-visual-bottom-offset, 0px) +
+        env(safe-area-inset-bottom) + 5.75rem
+    );
+    right: calc(var(--chatbot-visual-inline-offset, 0px) + 0.75rem);
+    left: 0.75rem;
+  }
+
+  .chatbot-panel-position[data-chatbot-direction="rtl"] {
+    right: 0.75rem;
+    left: calc(var(--chatbot-visual-inline-offset, 0px) + 0.75rem);
+  }
+
+  @media (min-width: 640px) {
+    .chatbot-launcher-position {
+      right: 1.25rem;
+    }
+
+    .chatbot-launcher-position[data-chatbot-direction="rtl"] {
+      right: auto;
+      left: 1.25rem;
+    }
+
+    .chatbot-panel-position {
+      right: 1.25rem;
+      left: auto;
+    }
+
+    .chatbot-panel-position[data-chatbot-direction="rtl"] {
+      right: auto;
+      left: 1.25rem;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     html {
       scroll-behavior: auto;
