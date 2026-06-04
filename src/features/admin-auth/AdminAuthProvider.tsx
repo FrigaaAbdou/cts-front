@@ -17,7 +17,11 @@ type AdminAuthContextValue = {
   admin: AdminUser | null;
   token: string | null;
   status: AdminAuthStatus;
-  login: (input: { email: string; password: string }) => Promise<AdminUser>;
+  login: (input: {
+    email: string;
+    password: string;
+    rememberSession?: boolean;
+  }) => Promise<AdminUser>;
   logout: () => Promise<void>;
 };
 
@@ -38,30 +42,27 @@ function readStoredToken() {
     return null;
   }
 
-  const storage = window.localStorage;
+  const persistentToken = window.localStorage?.getItem(ADMIN_TOKEN_STORAGE_KEY);
 
-  return storage && typeof storage.getItem === "function"
-    ? storage.getItem(ADMIN_TOKEN_STORAGE_KEY)
-    : null;
+  if (persistentToken) {
+    return persistentToken;
+  }
+
+  return window.sessionStorage?.getItem(ADMIN_TOKEN_STORAGE_KEY) ?? null;
 }
 
-function persistToken(token: string | null) {
+function persistToken(token: string | null, persistSession = false) {
   if (typeof window === "undefined") {
     return;
   }
 
-  const storage = window.localStorage;
-
-  if (!storage) {
-    return;
-  }
+  window.localStorage?.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+  window.sessionStorage?.removeItem(ADMIN_TOKEN_STORAGE_KEY);
 
   if (token) {
-    storage.setItem(ADMIN_TOKEN_STORAGE_KEY, token);
-    return;
+    const storage = persistSession ? window.localStorage : window.sessionStorage;
+    storage?.setItem(ADMIN_TOKEN_STORAGE_KEY, token);
   }
-
-  storage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
 }
 
 export function AdminAuthProvider({ children }: { children: ReactNode }) {
@@ -115,7 +116,7 @@ export function AdminAuthProvider({ children }: { children: ReactNode }) {
       async login(input) {
         const payload = await loginAdmin(input);
 
-        persistToken(payload.token);
+        persistToken(payload.token, input.rememberSession === true);
         setToken(payload.token);
         setAdmin(payload.admin);
         setStatus("authenticated");

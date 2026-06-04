@@ -44,6 +44,7 @@ describe("AdminLoginPage", () => {
       expect(loginMock).toHaveBeenCalledWith({
         email: "admin@cts.local",
         password: "secret123",
+        rememberSession: false,
       });
     });
 

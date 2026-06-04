@@ -29,6 +29,23 @@ function createLocalStorageMock() {
   };
 }
 
+function createSessionStorageMock() {
+  const store = new Map<string, string>();
+
+  return {
+    getItem: vi.fn((key: string) => store.get(key) ?? null),
+    setItem: vi.fn((key: string, value: string) => {
+      store.set(key, value);
+    }),
+    removeItem: vi.fn((key: string) => {
+      store.delete(key);
+    }),
+    clear: vi.fn(() => {
+      store.clear();
+    }),
+  };
+}
+
 function Consumer() {
   const { admin, status, login, logout } = useAdminAuth();
 
@@ -44,6 +61,18 @@ function Consumer() {
       >
         login
       </button>
+      <button
+        type="button"
+        onClick={() =>
+          void login({
+            email: "admin@cts.local",
+            password: "secret123",
+            rememberSession: true,
+          })
+        }
+      >
+        login remembered
+      </button>
       <button type="button" onClick={() => void logout()}>
         logout
       </button>
@@ -55,6 +84,10 @@ describe("AdminAuthProvider", () => {
   beforeEach(() => {
     Object.defineProperty(window, "localStorage", {
       value: createLocalStorageMock(),
+      configurable: true,
+    });
+    Object.defineProperty(window, "sessionStorage", {
+      value: createSessionStorageMock(),
       configurable: true,
     });
   });
@@ -88,7 +121,7 @@ describe("AdminAuthProvider", () => {
     expect(getAdminMe).toHaveBeenCalledWith("stored-token");
   });
 
-  it("logs in and persists the admin token", async () => {
+  it("logs in and stores the admin token in session storage by default", async () => {
     const user = userEvent.setup();
 
     vi.mocked(loginAdmin).mockResolvedValue({
@@ -114,7 +147,39 @@ describe("AdminAuthProvider", () => {
       expect(screen.getByTestId("status")).toHaveTextContent("authenticated");
     });
 
-    expect(window.localStorage.getItem("cts-admin-token")).toBe("fresh-token");
+    expect(window.sessionStorage.getItem("cts-admin-token")).toBe("fresh-token");
+    expect(window.localStorage.getItem("cts-admin-token")).toBeNull();
+    expect(screen.getByTestId("email")).toHaveTextContent("admin@cts.local");
+  });
+
+  it("persists the admin token in local storage when rememberSession is enabled", async () => {
+    const user = userEvent.setup();
+
+    vi.mocked(loginAdmin).mockResolvedValue({
+      token: "remembered-token",
+      expiresIn: "8h",
+      admin: {
+        id: "admin-1",
+        email: "admin@cts.local",
+        role: "super_admin",
+        isActive: true,
+      },
+    });
+
+    render(
+      <AdminAuthProvider>
+        <Consumer />
+      </AdminAuthProvider>,
+    );
+
+    await user.click(screen.getByRole("button", { name: "login remembered" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("status")).toHaveTextContent("authenticated");
+    });
+
+    expect(window.localStorage.getItem("cts-admin-token")).toBe("remembered-token");
+    expect(window.sessionStorage.getItem("cts-admin-token")).toBeNull();
     expect(screen.getByTestId("email")).toHaveTextContent("admin@cts.local");
   });
 
@@ -151,6 +216,7 @@ describe("AdminAuthProvider", () => {
     });
 
     expect(window.localStorage.getItem("cts-admin-token")).toBeNull();
+    expect(window.sessionStorage.getItem("cts-admin-token")).toBeNull();
     expect(logoutAdmin).toHaveBeenCalledWith("fresh-token");
   });
 });

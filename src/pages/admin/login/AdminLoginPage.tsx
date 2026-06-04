@@ -43,6 +43,7 @@ export function AdminLoginPage() {
       await login({
         email: email.trim(),
         password,
+        rememberSession,
       });
 
       navigate(redirectTo, { replace: true });

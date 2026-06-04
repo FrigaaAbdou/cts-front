@@ -6,3 +6,12 @@ publish = "dist"
 from = "/*"
 to = "/index.html"
 status = 200
+
+[[headers]]
+for = "/*"
+[headers.values]
+Content-Security-Policy = "default-src 'self'; connect-src 'self' https://cts-chu-mustapha-api-8a07fa573391.herokuapp.com https://api.openai.com; img-src 'self' data:; font-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+Referrer-Policy = "strict-origin-when-cross-origin"
+X-Content-Type-Options = "nosniff"
+X-Frame-Options = "DENY"
