@@ -1,14 +1,34 @@
 import { apiRequest } from "@/lib/api/client";
 
+export type CampaignStatus = "draft" | "published" | "archived";
+export type CampaignPriorityLevel = "standard" | "important" | "high" | "urgent";
+export type CampaignTheme =
+  | "default"
+  | "emergency"
+  | "community"
+  | "mobile"
+  | "plasma"
+  | "partner";
+export type CampaignBadgeLabel =
+  | ""
+  | "Urgence estivale"
+  | "Collecte mobile"
+  | "Relais campus"
+  | "Collecte campus"
+  | "Plasma cible"
+  | "Été solidaire"
+  | "Partenariat local";
+
 export type AdminCampaignItem = {
   id: string;
   code: string;
-  status: string;
+  status: CampaignStatus;
   isPublished: boolean;
   isActive: boolean;
   priority: number;
-  badgeLabel: string;
-  theme: string;
+  priorityLevel?: CampaignPriorityLevel;
+  badgeLabel: CampaignBadgeLabel;
+  theme: CampaignTheme;
   startDate: string | null;
   endDate: string | null;
   localeContent: {
@@ -26,13 +46,14 @@ export type AdminCampaignItem = {
 };
 
 export type AdminCampaignPayload = {
-  code: string;
-  status: string;
+  code?: string;
+  status: CampaignStatus;
   isPublished: boolean;
   isActive: boolean;
-  priority: number;
-  badgeLabel: string;
-  theme: string;
+  priority?: number;
+  priorityLevel: CampaignPriorityLevel;
+  badgeLabel: CampaignBadgeLabel;
+  theme: CampaignTheme;
   startDate: string | null;
   endDate: string | null;
   localeContent: {

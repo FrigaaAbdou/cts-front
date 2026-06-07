@@ -62,7 +62,8 @@ describe("AdminCampaignsPage", () => {
     );
 
     expect(await screen.findAllByText("SOLIDARITE-2026")).not.toHaveLength(0);
-    expect(screen.getByText("Solidarité 2026")).toBeInTheDocument();
+    expect(screen.getAllByText("Solidarité 2026").length).toBeGreaterThan(0);
+    expect(screen.getByText("Campagne actuellement en ligne")).toBeInTheDocument();
   });
 
   it("creates a campaign from the editor form", async () => {
@@ -93,7 +94,6 @@ describe("AdminCampaignsPage", () => {
     );
 
     await user.click(screen.getByRole("button", { name: /nouvelle campagne/i }));
-    await user.type(screen.getByLabelText("Code"), "solidarite-2026");
     await user.type(screen.getByLabelText("Titre FR"), "Solidarité 2026");
     await user.type(screen.getByLabelText("Description FR"), "Desc");
     await user.type(screen.getByLabelText("CTA FR"), "Je donne");
@@ -148,8 +148,8 @@ describe("AdminCampaignsPage", () => {
       </MemoryRouter>,
     );
 
-    await screen.findByText("Solidarité 2026");
-    await user.click(screen.getAllByRole("combobox")[1]);
+    await screen.findAllByText("Solidarité 2026");
+    await user.click(screen.getByRole("combobox", { name: "Active" }));
     await user.click(await screen.findByText("Non"));
     await user.click(screen.getByRole("button", { name: /enregistrer la campagne/i }));
 
@@ -208,7 +208,7 @@ describe("AdminCampaignsPage", () => {
       </MemoryRouter>,
     );
 
-    await screen.findByText("Solidarité 2026");
+    await screen.findAllByText("Solidarité 2026");
     await user.clear(screen.getByLabelText("Titre FR"));
     await user.type(screen.getByLabelText("Titre FR"), "Solidarité modifiée");
     await user.click(screen.getByText("JEUNES-2026"));
