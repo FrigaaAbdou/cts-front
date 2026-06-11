@@ -8,25 +8,20 @@ type BloodDropLogoProps = {
 export function BloodDropLogo({ className, compact = false }: BloodDropLogoProps) {
   return (
     <svg
-      viewBox="0 0 48 48"
+      viewBox="0 0 40 40"
       aria-hidden="true"
       className={cn("shrink-0", compact ? "size-8" : "size-10", className)}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
-        d="M24 4.5C24 4.5 12 17 12 27.5C12 35.6 17.4 41.5 24 41.5C30.6 41.5 36 35.6 36 27.5C36 17 24 4.5 24 4.5Z"
+        d="M20 4C20 4 9 15.6 9 24.8C9 31.9 14.1 37 20 37C25.9 37 31 31.9 31 24.8C31 15.6 20 4 20 4Z"
         className="fill-brand-red"
       />
       <path
-        d="M17.5 28.5C18.7 31.4 21.1 33 24 33C26.9 33 29.3 31.4 30.5 28.5"
-        className="stroke-white/80"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M24 10.5C24 10.5 17 18.5 17 25.5C17 30.4 20.1 34 24 34C27.9 34 31 30.4 31 25.5C31 18.5 24 10.5 24 10.5Z"
-        className="fill-white/20"
+        d="M16.2 21.2C17.8 19 19 17.5 19.8 16.5C20.1 16.1 20.6 16.1 20.9 16.5C22.3 18.1 24.1 20.5 25.5 23C25.8 23.4 25.5 24 25 24H16.6C16.2 24 15.9 23.5 16.2 23.1C16.5 22.5 16.9 21.9 16.2 21.2Z"
+        fill="white"
+        fillOpacity="0.92"
       />
     </svg>
   );

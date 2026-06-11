@@ -1,23 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img" aria-label="CTS Mustapha">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" fill="none" role="img" aria-label="CTS Mustapha">
   <title>CTS Mustapha</title>
-  <defs>
-    <linearGradient id="drop" x1="18" y1="10" x2="46" y2="54" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#ff6a6a"/>
-      <stop offset="1" stop-color="#e11d48"/>
-    </linearGradient>
-  </defs>
   <path
-    d="M32 6C32 6 16 24 16 36.5C16 45.6 22.9 53 32 53C41.1 53 48 45.6 48 36.5C48 24 32 6 32 6Z"
-    fill="url(#drop)"
+    d="M20 4C20 4 9 15.6 9 24.8C9 31.9 14.1 37 20 37C25.9 37 31 31.9 31 24.8C31 15.6 20 4 20 4Z"
+    fill="#dc2626"
   />
   <path
-    d="M25 34.5C25 30.6 28.2 27.5 32 27.5C35.8 27.5 39 30.6 39 34.5C39 38.4 35.8 41.5 32 41.5C28.2 41.5 25 38.4 25 34.5Z"
+    d="M16.2 21.2C17.8 19 19 17.5 19.8 16.5C20.1 16.1 20.6 16.1 20.9 16.5C22.3 18.1 24.1 20.5 25.5 23C25.8 23.4 25.5 24 25 24H16.6C16.2 24 15.9 23.5 16.2 23.1C16.5 22.5 16.9 21.9 16.2 21.2Z"
     fill="#fff"
-    fill-opacity=".18"
-  />
-  <path
-    d="M27.8 18.8C29.2 16.9 30.5 15.3 31.4 14.2C31.7 13.8 32.3 13.8 32.6 14.2C34.3 16.2 36.5 19.1 38.4 22.1C38.7 22.5 38.4 23.1 37.9 23.1H28.3C27.9 23.1 27.6 22.6 27.8 22.2C28.2 21.4 28.7 20.2 27.8 18.8Z"
-    fill="#fff"
-    fill-opacity=".9"
+    fill-opacity=".92"
   />
 </svg>
