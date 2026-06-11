@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   ArrowRight,
-  Droplets,
   Eye,
   EyeOff,
   LoaderCircle,
@@ -75,7 +74,15 @@ export function AdminLoginPage() {
       <Card className="w-full max-w-xs rounded-3xl border border-red-100/70 bg-white shadow-[0_18px_48px_rgba(15,23,42,0.05)] sm:max-w-sm md:max-w-md">
         <CardContent className="px-6 py-8 sm:px-8 md:px-10">
           <div className="flex flex-col items-center text-center">
-            <DropMark />
+            <div className="flex h-16 w-24 items-center justify-center rounded-2xl border border-red-100 bg-red-50/60 p-2 shadow-sm">
+              <img
+                src="/brand/logo-cts-transparent.png"
+                alt="CTS Mustapha"
+                className="h-full w-full object-contain"
+                loading="eager"
+                decoding="async"
+              />
+            </div>
             <h1 className="mt-5 text-balance text-3xl font-semibold tracking-[-0.05em] text-slate-950">
               Espace administrateur
             </h1>
@@ -183,14 +190,6 @@ export function AdminLoginPage() {
           </form>
         </CardContent>
       </Card>
-    </div>
-  );
-}
-
-function DropMark() {
-  return (
-    <div className="flex size-14 items-center justify-center rounded-2xl border border-red-100 bg-red-50 text-brand-red">
-      <Droplets className="size-6" strokeWidth={1.9} />
     </div>
   );
 }
