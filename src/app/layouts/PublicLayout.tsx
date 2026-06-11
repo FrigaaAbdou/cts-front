@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { useEffect } from "react";
 
 import { AppFooter } from "@/components/layout/AppFooter";
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -15,6 +16,15 @@ export function PublicLayout({
   chatbotPage = "home",
 }: PublicLayoutProps) {
   const { direction } = useLocale();
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    document.title = "CTS Mustapha";
+
+    return () => {
+      document.title = previousTitle;
+    };
+  }, []);
 
   return (
     <div

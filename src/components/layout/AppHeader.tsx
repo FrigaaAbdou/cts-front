@@ -1,7 +1,8 @@
-import { Heart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 
+import { Heart } from "lucide-react";
+import { BloodDropLogo } from "@/components/brand/BloodDropLogo";
 import { isRtlLocale } from "@/i18n/direction";
 import { useLocale } from "@/i18n/locale";
 import { cn } from "@/lib/utils";
@@ -127,8 +128,8 @@ export function AppHeader() {
                 "flex min-w-0 items-center gap-3 rounded-xl outline-none transition hover:opacity-90 focus-visible:ring-2 focus-visible:ring-brand-red/30",
               )}
             >
-              <div className="flex h-14 w-20 shrink-0 items-center justify-center rounded-md border border-red-100 bg-white text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-brand-red shadow-sm sm:h-16 sm:w-24">
-                CTS
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white shadow-sm sm:h-16 sm:w-16">
+                <BloodDropLogo />
               </div>
 
               <div className={cn("min-w-0", isRtl && "text-right")}>

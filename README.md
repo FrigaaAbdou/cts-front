@@ -1,6 +1,6 @@
 # front
 
-Frontend React + Vite de l'application de don de sang inspiree de `https://cts-chu-mustapha.com/fr`.
+Frontend React + Vite de l'application de don de sang inspiree de `https://ctsmustapha.com/fr`.
 
 Le repo couvre maintenant :
 - l'experience publique bilingue

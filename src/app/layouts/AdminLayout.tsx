@@ -14,13 +14,16 @@ export function AdminLayout() {
   useEffect(() => {
     const previousLang = document.documentElement.lang;
     const previousDir = document.documentElement.dir;
+    const previousTitle = document.title;
 
     document.documentElement.lang = "fr";
     document.documentElement.dir = "ltr";
+    document.title = "CTS Mustapha Admin";
 
     return () => {
       document.documentElement.lang = previousLang;
       document.documentElement.dir = previousDir;
+      document.title = previousTitle;
     };
   }, []);
 

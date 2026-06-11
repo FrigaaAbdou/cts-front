@@ -1,7 +1,6 @@
 import {
   CalendarDays,
   CalendarRange,
-  Droplets,
   FileText,
   LayoutDashboard,
   LogOut,
@@ -11,6 +10,7 @@ import {
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
+import { BloodDropLogo } from "@/components/brand/BloodDropLogo";
 import { useAdminAuth } from "@/features/admin-auth/AdminAuthProvider";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -94,8 +94,8 @@ export function AdminSidebar() {
         )}
       >
         <div className="flex items-center gap-3">
-          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-red-50 text-brand-red shadow-sm">
-            <Droplets className="size-5" strokeWidth={1.9} />
+          <div className="flex size-12 shrink-0 items-center justify-center rounded-2xl border border-red-100 bg-white shadow-sm">
+            <BloodDropLogo className="size-7" />
           </div>
 
           {!isCollapsed ? (
