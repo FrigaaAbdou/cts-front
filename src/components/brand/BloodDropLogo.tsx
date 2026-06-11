@@ -7,22 +7,17 @@ type BloodDropLogoProps = {
 
 export function BloodDropLogo({ className, compact = false }: BloodDropLogoProps) {
   return (
-    <svg
-      viewBox="0 0 40 40"
+    <img
+      src="/brand/logo-cts-transparent.png"
+      alt=""
       aria-hidden="true"
-      className={cn("shrink-0", compact ? "size-8" : "size-10", className)}
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path
-        d="M20 4C20 4 9 15.6 9 24.8C9 31.9 14.1 37 20 37C25.9 37 31 31.9 31 24.8C31 15.6 20 4 20 4Z"
-        className="fill-brand-red"
-      />
-      <path
-        d="M16.2 21.2C17.8 19 19 17.5 19.8 16.5C20.1 16.1 20.6 16.1 20.9 16.5C22.3 18.1 24.1 20.5 25.5 23C25.8 23.4 25.5 24 25 24H16.6C16.2 24 15.9 23.5 16.2 23.1C16.5 22.5 16.9 21.9 16.2 21.2Z"
-        fill="white"
-        fillOpacity="0.92"
-      />
-    </svg>
+      className={cn(
+        "shrink-0 object-contain",
+        compact ? "h-8 w-12" : "h-10 w-16",
+        className,
+      )}
+      loading="eager"
+      decoding="async"
+    />
   );
 }
