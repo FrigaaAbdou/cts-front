@@ -72,74 +72,47 @@ function CampaignFeatureCard({
 
   return (
     <article className="overflow-hidden rounded-[2rem] border border-red-100 bg-white shadow-soft">
-      <div className="grid lg:grid-cols-[1.06fr_0.94fr]">
-        <div className="flex flex-col justify-between p-7 sm:p-9 lg:p-10">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-red">
-              <Sparkles className="h-3.5 w-3.5" />
-              {getOperationalStatusLabel(campaign.operationalStatus, locale)}
-            </div>
+      <div className="relative overflow-hidden bg-[#f7f0ea]">
+        <img
+          src="/images/campaign-metro-donneur-illustration.jpeg"
+          alt={campaign.title}
+          className="h-[300px] w-full object-cover object-center sm:h-[340px] lg:h-[380px]"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(255,255,255,0.96)_0%,rgba(255,255,255,0.72)_22%,rgba(255,255,255,0.08)_58%,rgba(255,255,255,0)_100%)]" />
+        <div className="absolute left-6 top-6 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-brand-red shadow-sm backdrop-blur">
+          <Sparkles className="h-3.5 w-3.5" />
+          {getOperationalStatusLabel(campaign.operationalStatus, locale)}
+        </div>
+      </div>
 
-            <h3 className="mt-5 max-w-xl text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
-              {campaign.title}
-            </h3>
+      <div className="p-6 sm:p-8 lg:p-9">
+        <h3 className="max-w-2xl text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
+          {campaign.title}
+        </h3>
 
-            <p className="mt-5 max-w-xl text-base leading-8 text-slate-600">
-              {campaign.description}
-            </p>
+        <p className="mt-4 max-w-2xl text-base leading-8 text-slate-600">
+          {campaign.description}
+        </p>
+
+        <div className="mt-6 flex flex-wrap gap-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-4 py-2 text-sm text-slate-700">
+            <CalendarDays className="h-4 w-4 shrink-0 text-brand-red" />
+            <span>{dateLabel || (locale === "ar" ? "دون تاريخ محدد" : "Date non précisée")}</span>
           </div>
 
-          <div className="mt-8 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 shrink-0 text-brand-red" />
-                <span className="font-medium text-slate-800">
-                  {dateLabel || (locale === "ar" ? "دون تاريخ محدد" : "Date non précisée")}
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-6 text-slate-500">
-                {locale === "ar"
-                  ? "يمكن للمتبرعين رؤية هذه الحملة وحجز موعد مرتبط بها."
-                  : "Les donneurs peuvent voir cette campagne et réserver dessus."}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
-              <div className="flex items-center gap-2">
-                <Clock3 className="h-4 w-4 shrink-0 text-brand-red" />
-                <span className="font-medium text-slate-800">
-                  {campaign.badgeLabel || campaign.code}
-                </span>
-              </div>
-              <p className="mt-2 text-xs leading-6 text-slate-500">
-                {locale === "ar"
-                  ? "حملة منشورة وفعالة في الواجهة العمومية."
-                  : "Campagne publiée et active sur le site public."}
-              </p>
-            </div>
+          <div className="inline-flex items-center gap-2 rounded-full bg-slate-50 px-4 py-2 text-sm text-slate-700">
+            <Clock3 className="h-4 w-4 shrink-0 text-brand-red" />
+            <span>{campaign.badgeLabel || campaign.code}</span>
           </div>
-
-          <Link
-            to={getCampaignLink(campaign.code)}
-            className="mt-8 inline-flex w-fit items-center gap-2 rounded-2xl bg-brand-red px-6 py-3.5 text-base font-semibold text-white shadow-soft transition hover:bg-brand-dark"
-          >
-            {actionLabel}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
         </div>
 
-        <div className="relative min-h-[320px] overflow-hidden bg-[#f7f0ea] lg:min-h-[540px]">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.95),rgba(255,255,255,0.45)_34%,rgba(248,240,233,0.1)_70%)]" />
-          <img
-            src="/images/campaign-metro-donneur-illustration.jpeg"
-            alt={campaign.title}
-            className="absolute inset-0 h-full w-full object-contain object-center p-4 sm:p-6 lg:p-8"
-          />
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/70 to-transparent" />
-          <div className="absolute left-5 top-5 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm backdrop-blur">
-            {locale === "ar" ? "صورة الحملة" : "Visuel campagne"}
-          </div>
-        </div>
+        <Link
+          to={getCampaignLink(campaign.code)}
+          className="mt-7 inline-flex w-fit items-center gap-2 rounded-2xl bg-brand-red px-6 py-3.5 text-base font-semibold text-white shadow-soft transition hover:bg-brand-dark"
+        >
+          {actionLabel}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
       </div>
     </article>
   );
