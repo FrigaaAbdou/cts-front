@@ -6,6 +6,7 @@ import { HomePage } from "@/pages/home/HomePage";
 
 vi.mock("@/lib/api/campaignApi", () => ({
   getFeaturedCampaign: vi.fn().mockResolvedValue(null),
+  getActiveCampaigns: vi.fn().mockResolvedValue([]),
 }));
 
 vi.mock("@/lib/api/faqApi", () => ({
@@ -79,7 +80,7 @@ test("keeps rendering when faq and campaigns are unavailable", async () => {
 
 test("renders dynamic homepage content from backend-driven sections", async () => {
   const { getHomeContent } = await import("@/lib/api/homeApi");
-  const { getFeaturedCampaign } = await import("@/lib/api/campaignApi");
+  const { getFeaturedCampaign, getActiveCampaigns } = await import("@/lib/api/campaignApi");
 
   vi.mocked(getFeaturedCampaign).mockResolvedValueOnce({
     id: "campaign-1",
@@ -94,6 +95,22 @@ test("renders dynamic homepage content from backend-driven sections", async () =
     theme: "emergency",
     priority: 90,
   });
+  vi.mocked(getActiveCampaigns).mockResolvedValueOnce([
+    {
+      id: "campaign-1",
+      code: "SOLIDARITE-2026",
+      title: "Campagne de solidarité",
+      description: "Description campagne",
+      status: "published",
+      operationalStatus: "ongoing",
+      startDate: null,
+      endDate: null,
+      ctaLabel: "Participer",
+      badgeLabel: "Urgence estivale",
+      theme: "emergency",
+      priority: 90,
+    },
+  ]);
 
   vi.mocked(getHomeContent).mockResolvedValueOnce({
     hero: {
@@ -153,13 +170,52 @@ test("renders dynamic homepage content from backend-driven sections", async () =
       name: /un titre piloté par le backend/i,
     }),
   ).toBeInTheDocument();
-  expect(screen.getByText(/urgence estivale/i)).toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /les campagnes ouvertes au rendez-vous/i })).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: /choisir cette campagne/i }),
+  ).toHaveAttribute("href", "/appointment?campaignCode=SOLIDARITE-2026");
   expect(screen.getByRole("heading", { name: /des données utiles/i })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: /vérifiez votre profil/i })).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: /passez à l'action/i })).toBeInTheDocument();
   expect(
     screen.getByRole("heading", { level: 2, name: /le parcours/i }),
   ).toBeInTheDocument();
+});
+
+test("opens the campaign section with a rendez-vous link", async () => {
+  const { getActiveCampaigns } = await import("@/lib/api/campaignApi");
+
+  vi.mocked(getActiveCampaigns).mockResolvedValueOnce([
+    {
+      id: "campaign-2",
+      code: "METRO-2026",
+      title: "Collecte métro",
+      description: "Description campagne",
+      status: "published",
+      operationalStatus: "scheduled",
+      startDate: "2026-06-14T00:00:00.000Z",
+      endDate: "2026-06-20T00:00:00.000Z",
+      ctaLabel: "Participer",
+      badgeLabel: "Collecte mobile",
+      theme: "mobile",
+      priority: 80,
+    },
+  ]);
+
+  render(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>,
+  );
+
+  expect(
+    await screen.findByRole("heading", {
+      name: /collecte métro/i,
+    }),
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: /choisir cette campagne/i }),
+  ).toHaveAttribute("href", "/appointment?campaignCode=METRO-2026");
 });
 
 test("falls back to arabic homepage copy when content loading fails in ar locale", async () => {
@@ -187,7 +243,7 @@ test("falls back to arabic homepage copy when content loading fails in ar locale
     }),
   ).toBeInTheDocument();
   expect(screen.getByText(/احجز موعدك في بضع نقرات/i)).toBeInTheDocument();
-  expect(screen.getByText(/فترة الحمل أو الرضاعة تستوجب تأجيل التبرع مؤقتاً/i)).toBeInTheDocument();
+  expect(screen.getByText(/حمى أو إنفلونزا أو عدوى أو التهاب حلق حديث/i)).toBeInTheDocument();
 });
 
 test("renders detailed contraindications in french", async () => {
@@ -198,10 +254,10 @@ test("renders detailed contraindications in french", async () => {
   );
 
   expect(
-    await screen.findByText(/un épisode infectieux récent impose d'attendre avant tout don de sang/i),
+    await screen.findByText(/fièvre, grippe, infection ou mal de gorge récent/i),
   ).toBeInTheDocument();
   expect(
-    screen.getByText(/la période de grossesse ou d'allaitement nécessite un report temporaire du don/i),
+    screen.getByText(/infection transmissible par le sang connue/i),
   ).toBeInTheDocument();
 });
 

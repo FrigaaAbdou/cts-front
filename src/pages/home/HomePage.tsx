@@ -2,15 +2,16 @@ import { useEffect, useState } from "react";
 
 import { PublicLayout } from "@/app/layouts/PublicLayout";
 import { CtaBannerSection } from "@/components/marketing/CtaBannerSection";
+import { CampaignsSection } from "@/components/marketing/CampaignsSection";
 import { EligibilityPreviewSection } from "@/components/marketing/EligibilityPreviewSection";
 import { FaqSection } from "@/components/marketing/FaqSection";
 import { HeroSection } from "@/components/marketing/HeroSection";
 import { ImpactSection } from "@/components/marketing/ImpactSection";
 import { ProcessSection } from "@/components/marketing/ProcessSection";
 import { ScrollReveal } from "@/components/motion/ScrollReveal";
-import type { FaqItem, HomePageContent } from "@/features/home/types";
+import type { CampaignItem, FaqItem, HomePageContent } from "@/features/home/types";
 import { useLocale } from "@/i18n/locale";
-import { getFeaturedCampaign } from "@/lib/api/campaignApi";
+import { getActiveCampaigns, getFeaturedCampaign } from "@/lib/api/campaignApi";
 import { getFaq } from "@/lib/api/faqApi";
 import {
   getHomeFallbackContent,
@@ -23,6 +24,7 @@ export function HomePage() {
     getHomeFallbackContent(locale),
   );
   const [faqItems, setFaqItems] = useState<FaqItem[]>([]);
+  const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
 
   useEffect(() => {
     let isActive = true;
@@ -34,6 +36,7 @@ export function HomePage() {
         getFeaturedCampaign(locale),
         getFaq(locale),
       ]);
+      const campaignsResult = await getActiveCampaigns(locale).catch(() => []);
 
       const featuredCampaign =
         featuredCampaignResult.status === "fulfilled"
@@ -42,6 +45,10 @@ export function HomePage() {
 
       if (faqResult.status === "fulfilled" && isActive) {
         setFaqItems(faqResult.value);
+      }
+
+      if (isActive) {
+        setCampaigns(campaignsResult);
       }
 
       try {
@@ -71,6 +78,9 @@ export function HomePage() {
           description={content.hero.description}
           ctaLabel={content.hero.ctaLabel}
         />
+      </ScrollReveal>
+      <ScrollReveal delay={60} stagger variant="slide-left">
+        <CampaignsSection campaigns={campaigns} />
       </ScrollReveal>
       <ScrollReveal delay={80} stagger>
         <ImpactSection

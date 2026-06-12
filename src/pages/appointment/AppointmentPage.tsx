@@ -2,11 +2,13 @@ import { PublicLayout } from "@/app/layouts/PublicLayout";
 import { AppointmentForm } from "@/components/appointment/AppointmentForm";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { useLocale } from "@/i18n/locale";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function AppointmentPage() {
   const { locale } = useLocale();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const campaignCode = searchParams.get("campaignCode") ?? "";
 
   const copy =
     locale === "ar"
@@ -38,6 +40,7 @@ export function AppointmentPage() {
           </div>
 
           <AppointmentForm
+            initialCampaignCode={campaignCode}
             onSuccess={(payload) => {
               navigate("/appointment/success", {
                 state: payload,

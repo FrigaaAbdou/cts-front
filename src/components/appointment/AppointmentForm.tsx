@@ -110,6 +110,7 @@ function isAppointmentFormMeta(value: unknown): value is AppointmentFormMeta {
 }
 
 type AppointmentFormProps = {
+  initialCampaignCode?: string;
   onSuccess?: (payload: {
     appointmentDate: string;
     appointmentTime: string;
@@ -118,7 +119,7 @@ type AppointmentFormProps = {
   }) => void;
 };
 
-export function AppointmentForm({ onSuccess }: AppointmentFormProps) {
+export function AppointmentForm({ initialCampaignCode, onSuccess }: AppointmentFormProps) {
   const { locale } = useLocale();
   const localizedFallbackMeta = useMemo(
     () => getFallbackAppointmentMeta(locale),
@@ -189,6 +190,25 @@ export function AppointmentForm({ onSuccess }: AppointmentFormProps) {
     lastDonationDate: "appointment-last-donation-date",
     remarks: "appointment-remarks",
   } as const;
+
+  useEffect(() => {
+    if (!isUnlocked || !initialCampaignCode) {
+      return;
+    }
+
+    const campaignMatch = campaignOptions.some(
+      (option) => option.value === initialCampaignCode,
+    );
+
+    if (campaignMatch && form.getValues("campaignCode") !== initialCampaignCode) {
+      form.setValue("campaignCode", initialCampaignCode, {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: true,
+      });
+    }
+  }, [campaignOptions, form, initialCampaignCode, isUnlocked]);
+
   const copy =
     locale === "ar"
       ? {
