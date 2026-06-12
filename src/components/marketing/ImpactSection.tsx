@@ -2,6 +2,7 @@ import { Clock3, HeartPulse, ShieldCheck, Users } from "lucide-react";
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionShell } from "@/components/layout/SectionShell";
+import { cn } from "@/lib/utils";
 
 const fallbackStats = [
   {
@@ -38,6 +39,15 @@ export function ImpactSection({
   stats = fallbackStats,
 }: ImpactSectionProps) {
   const iconMap = [Users, Clock3, ShieldCheck];
+  const statsCount = stats.length;
+  const gridClassName =
+    statsCount <= 1
+      ? "max-w-xl"
+      : statsCount === 2
+        ? "max-w-5xl md:grid-cols-2"
+        : statsCount === 3
+          ? "max-w-6xl lg:grid-cols-3"
+          : "max-w-7xl md:grid-cols-2 xl:grid-cols-4";
 
   return (
     <SectionShell className="pt-6">
@@ -50,21 +60,21 @@ export function ImpactSection({
           {title}
         </h2>
 
-        <div className="mt-14 grid gap-8 lg:grid-cols-3">
+        <div className={cn("mx-auto mt-14 grid gap-8", gridClassName)}>
           {stats.map(({ value, label }, index) => {
             const Icon = iconMap[index] ?? HeartPulse;
 
             return (
-            <article
-              key={label}
-              className="rounded-[1.75rem] bg-white px-8 pb-10 pt-14 text-center shadow-soft"
-            >
-              <div className="mx-auto -mt-20 flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-soft">
-                <Icon className="h-6 w-6" />
-              </div>
-              <p className="mt-8 text-5xl font-black text-slate-950">{value}</p>
-              <p className="mt-3 text-lg leading-8 text-slate-600">{label}</p>
-            </article>
+              <article
+                key={label}
+                className="rounded-[1.75rem] bg-white px-8 pb-10 pt-14 text-center shadow-soft"
+              >
+                <div className="mx-auto -mt-20 flex h-16 w-16 items-center justify-center rounded-full bg-brand-red text-white shadow-soft">
+                  <Icon className="h-6 w-6" />
+                </div>
+                <p className="mt-8 text-5xl font-black text-slate-950">{value}</p>
+                <p className="mt-3 text-lg leading-8 text-slate-600">{label}</p>
+              </article>
             );
           })}
         </div>

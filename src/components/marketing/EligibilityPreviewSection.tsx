@@ -1,12 +1,14 @@
 import {
+  BadgeAlert,
   CheckCircle2,
+  Clock3,
   HeartPulse,
+  Pill,
   Scale,
+  ShieldAlert,
   Thermometer,
   Utensils,
   UserRoundCheck,
-  UserRoundX,
-  Baby,
   Syringe,
   XCircle,
 } from "lucide-react";
@@ -17,47 +19,86 @@ import { useLocale } from "@/i18n/locale";
 
 const requirements = [
   {
-    label: "Âge entre 18 et 65 ans",
-    description: "Le donneur doit se situer dans la tranche d'âge médicalement autorisée.",
+    label: "Vous avez l'âge requis",
+    description: "Vous êtes majeur selon la réglementation locale.",
     icon: UserRoundCheck,
   },
   {
-    label: "Poids minimum 50 kg",
-    description: "Le poids minimum garantit un prélèvement sécurisé et adapté.",
+    label: "Vous pesez au moins 50 kg",
+    description: "Ce critère permet de protéger le donneur pendant le prélèvement.",
     icon: Scale,
   },
   {
-    label: "Être en bonne santé générale",
-    description: "L'absence de symptômes ou de maladie récente facilite la prise en charge.",
+    label: "Vous êtes en bonne santé le jour du don",
+    description: "Vous n'avez pas de fièvre, d'infection, de malaise ou de fatigue importante.",
     icon: HeartPulse,
   },
   {
-    label: "Ne pas être à jeun",
-    description: "Une bonne hydratation et un repas léger sont recommandés avant la venue.",
+    label: "Vous avez mangé et vous êtes bien hydraté",
+    description: "Il est déconseillé de venir à jeun pour donner son sang.",
     icon: Utensils,
+  },
+  {
+    label: "Votre dernier don respecte le délai minimum",
+    description: "L'intervalle entre deux dons sera vérifié avant le prélèvement.",
+    icon: Clock3,
+  },
+];
+
+const arabicRequirements = [
+  {
+    label: "توفر العمر والوزن المناسبين",
+    description: "توفر السن المطلوب والوزن الكافي للتبرع.",
+    icon: UserRoundCheck,
+  },
+  {
+    label: "وزن لا يقل عن 50 كلغ",
+    description: "هذا الشرط يساعد على حماية المتبرع أثناء سحب الدم.",
+    icon: Scale,
+  },
+  {
+    label: "حالة صحية جيدة يوم التبرع",
+    description: "عدم وجود حمى أو عدوى أو وعكة أو تعب شديد.",
+    icon: HeartPulse,
+  },
+  {
+    label: "تناول الطعام وشرب الماء قبل الحضور",
+    description: "لا ينصح بالمجيء على الريق قبل التبرع بالدم.",
+    icon: Utensils,
+  },
+  {
+    label: "احترام المدة الدنيا منذ آخر تبرع",
+    description: "يتم التحقق من الفاصل الزمني بين تبرعين قبل سحب الدم.",
+    icon: Clock3,
   },
 ];
 
 const contraindications = [
   {
-    label: "Infection ou fièvre récente",
-    description: "Un épisode infectieux récent impose d'attendre avant tout don de sang.",
+    label: "Fièvre, grippe, infection ou mal de gorge récent",
+    description: "Attendez d'être complètement rétabli avant de donner.",
     icon: Thermometer,
   },
   {
-    label: "Anémie connue ou fatigue importante",
-    description: "Une fatigue marquée ou une anémie doivent être évaluées avant de se présenter.",
-    icon: UserRoundX,
+    label: "Prise actuelle d'antibiotiques ou traitement important",
+    description: "Le don peut être reporté selon le médicament et la raison du traitement.",
+    icon: Pill,
   },
   {
-    label: "Grossesse ou allaitement",
-    description: "La période de grossesse ou d'allaitement nécessite un report temporaire du don.",
-    icon: Baby,
+    label: "Chirurgie, hospitalisation ou acte médical récent",
+    description: "Le délai dépend du type d'intervention réalisée.",
+    icon: BadgeAlert,
   },
   {
-    label: "Tatouage ou piercing récent",
-    description: "Un délai de sécurité est requis après un tatouage ou un piercing récent.",
+    label: "Tatouage, piercing ou exposition récente à un risque infectieux",
+    description: "Un délai d'attente peut être nécessaire pour protéger le receveur.",
     icon: Syringe,
+  },
+  {
+    label: "Infection transmissible par le sang connue",
+    description:
+      "Par exemple : VIH, hépatite B ou C, syphilis, paludisme ou maladie de Chagas. Ces situations nécessitent une évaluation médicale.",
+    icon: ShieldAlert,
   },
 ];
 
@@ -78,28 +119,35 @@ export function EligibilityPreviewSection({
   items,
 }: EligibilityPreviewSectionProps) {
   const { locale } = useLocale();
+  const requirementItems = locale === "ar" ? arabicRequirements : requirements;
   const contraindicationItems =
     locale === "ar"
       ? [
           {
-            label: "عدوى أو حمى حديثة",
-            description: "أي عدوى أو ارتفاع حرارة حديث يفرض تأجيل التبرع إلى حين التعافي.",
+            label: "حمى أو إنفلونزا أو عدوى أو التهاب حلق حديث",
+            description: "يجب الانتظار إلى حين التعافي الكامل قبل التبرع.",
             icon: Thermometer,
           },
           {
-            label: "فقر دم معروف أو إرهاق شديد",
-            description: "فقر الدم أو التعب الكبير يتطلبان تقييماً قبل الحضور للتبرع.",
-            icon: UserRoundX,
+            label: "تناول مضادات حيوية أو علاج مهم حاليا",
+            description: "قد يتم تأجيل التبرع حسب الدواء وسبب العلاج.",
+            icon: Pill,
           },
           {
-            label: "حمل أو رضاعة",
-            description: "فترة الحمل أو الرضاعة تستوجب تأجيل التبرع مؤقتاً.",
-            icon: Baby,
+            label: "جراحة أو استشفاء أو إجراء طبي حديث",
+            description: "مدة التأجيل تعتمد على نوع التدخل الذي تم.",
+            icon: BadgeAlert,
           },
           {
-            label: "وشم أو ثقب حديث",
-            description: "يجب احترام مدة أمان بعد الوشم أو الثقب الحديث قبل التبرع.",
+            label: "وشم أو ثقب أو تعرض حديث لخطر عدوى",
+            description: "قد تكون هناك مدة انتظار لحماية المتلقي.",
             icon: Syringe,
+          },
+          {
+            label: "وجود عدوى معروفة تنتقل عبر الدم",
+            description:
+              "مثل فيروس نقص المناعة أو التهاب الكبد B و C أو الزهري أو الملاريا أو داء شاغاس. هذه الحالات تحتاج إلى تقييم طبي.",
+            icon: ShieldAlert,
           },
         ]
       : contraindications;
@@ -113,19 +161,28 @@ export function EligibilityPreviewSection({
           requirements: "Conditions requises",
           contraindications: "Contre-indications",
         };
+  const medicalNote =
+    locale === "ar"
+      ? "هذا التحقق لا يعوض المقابلة الطبية. تؤكد أهلية التبرع النهائية دائما من طرف الفريق الطبي لحماية المتبرع والمتلقي."
+      : "Cette vérification ne remplace pas l'entretien médical. L'éligibilité finale au don est toujours confirmée par l'équipe médicale afin de protéger le donneur et le receveur.";
 
-  const dynamicRequirements =
-    items?.length
-      ? items.map((item, index) => ({
-          label: item.title,
-          description: item.description,
-          icon: requirements[index]?.icon ?? CheckCircle2,
-        }))
-      : requirements.map((item) => ({
-          label: item.label,
-          description: item.description,
-          icon: item.icon,
-        }));
+  const matchesLocale = (value: string) =>
+    locale === "ar" ? /[\u0600-\u06FF]/.test(value) : !/[\u0600-\u06FF]/.test(value);
+
+  const dynamicRequirements = requirementItems.map((fallbackItem, index) => {
+    const item = items?.[index];
+    const title = item?.title?.trim() ?? "";
+    const itemDescription = item?.description?.trim() ?? "";
+
+    return {
+      label: title && matchesLocale(title) ? title : fallbackItem.label,
+      description:
+        itemDescription && matchesLocale(itemDescription)
+          ? itemDescription
+          : fallbackItem.description,
+      icon: fallbackItem.icon ?? CheckCircle2,
+    };
+  });
 
   return (
     <SectionShell>
@@ -204,6 +261,10 @@ export function EligibilityPreviewSection({
               ))}
             </ul>
           </article>
+        </div>
+
+        <div className="mx-auto mt-8 max-w-4xl rounded-[1.5rem] border border-slate-200 bg-white/80 px-6 py-5 text-center shadow-sm backdrop-blur">
+          <p className="text-sm leading-7 text-slate-600">{medicalNote}</p>
         </div>
       </PageContainer>
     </SectionShell>

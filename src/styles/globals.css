@@ -13,10 +13,13 @@ html,
 body,
 #root {
   min-height: 100%;
+  width: 100%;
+  max-width: 100%;
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
@@ -24,6 +27,7 @@ body {
   background: #fffaf9;
   color: #101828;
   font-family: Inter, system-ui, sans-serif;
+  overflow-x: hidden;
 }
 
 @layer base {

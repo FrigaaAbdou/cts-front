@@ -28,23 +28,27 @@ export const homeFallbackContent: HomePageContent = {
     sectionLabel: "Éligibilité",
     title: "Suis-je éligible au don ?",
     description:
-      "Vérifiez votre éligibilité avant de prendre rendez-vous. En cas de doute, nos professionnels de santé sont là pour vous conseiller.",
+      "Avant de prendre rendez-vous, vérifiez rapidement les principales conditions. L'éligibilité finale sera confirmée sur place par l'équipe médicale.",
     items: [
       {
-        title: "Âge entre 18 et 65 ans",
-        description: "Avoir l’âge requis pour donner dans de bonnes conditions.",
+        title: "Vous avez l'âge requis",
+        description: "Vous êtes majeur selon la réglementation locale.",
       },
       {
-        title: "Poids minimum 50 kg",
-        description: "Assurer un don sûr et compatible avec votre profil.",
+        title: "Vous pesez au moins 50 kg",
+        description: "Ce critère permet de protéger le donneur pendant le prélèvement.",
       },
       {
-        title: "Bonne santé générale",
-        description: "Ne pas présenter de symptôme ou de contre-indication immédiate.",
+        title: "Vous êtes en bonne santé le jour du don",
+        description: "Vous n'avez pas de fièvre, d'infection, de malaise ou de fatigue importante.",
       },
       {
-        title: "Ne pas être à jeun",
-        description: "Manger et s’hydrater avant de se présenter au centre.",
+        title: "Vous avez mangé et vous êtes bien hydraté",
+        description: "Il est déconseillé de venir à jeun pour donner son sang.",
+      },
+      {
+        title: "Votre dernier don respecte le délai minimum",
+        description: "L'intervalle entre deux dons sera vérifié avant le prélèvement.",
       },
     ],
   },
@@ -106,23 +110,27 @@ export function getHomeFallbackContent(locale: "fr" | "ar"): HomePageContent {
         sectionLabel: "الأهلية",
         title: "هل أنا مؤهل للتبرع؟",
         description:
-          "تحقق من أهليتك قبل طلب الموعد. إذا كان لديك شك، ففريقنا الصحي موجود لإرشادك.",
+          "قبل طلب الموعد، تحقق بسرعة من الشروط الأساسية. يتم تأكيد الأهلية النهائية في عين المكان من طرف الفريق الطبي.",
         items: [
           {
-            title: "العمر بين 18 و65 سنة",
-            description: "بلوغ السن المطلوب للتبرع في ظروف جيدة.",
+            title: "أن يكون عمرك ضمن السن المطلوب",
+            description: "أن تكون بالغا وفقا للتنظيم المحلي.",
           },
           {
-            title: "الوزن الأدنى 50 كلغ",
-            description: "ضمان تبرع آمن ومتوافق مع وضعك الصحي.",
+            title: "أن يكون وزنك 50 كلغ على الأقل",
+            description: "هذا الشرط يساعد على حماية المتبرع أثناء سحب الدم.",
           },
           {
-            title: "حالة صحية جيدة",
-            description: "عدم وجود أعراض أو موانع فورية للتبرع.",
+            title: "أن تكون في صحة جيدة يوم التبرع",
+            description: "ألا تكون لديك حمى أو عدوى أو وعكة أو تعب شديد.",
           },
           {
-            title: "عدم الحضور على الريق",
-            description: "تناول وجبة خفيفة وشرب الماء قبل التوجه إلى المركز.",
+            title: "أن تكون قد أكلت وشربت الماء جيدا",
+            description: "لا ينصح بالمجيء على الريق للتبرع بالدم.",
+          },
+          {
+            title: "أن يحترم آخر تبرع المدة الدنيا المطلوبة",
+            description: "يتم التحقق من الفاصل الزمني بين تبرعين قبل السحب.",
           },
         ],
       },
