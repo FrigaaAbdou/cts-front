@@ -98,14 +98,26 @@ function isAppointmentFormMeta(value: unknown): value is AppointmentFormMeta {
   }
 
   const candidate = value as Partial<AppointmentFormMeta>;
+  const communesByWilaya = candidate.communesByWilaya;
 
   return (
     Array.isArray(candidate.genders) &&
     Array.isArray(candidate.wilayas) &&
     Array.isArray(candidate.bloodGroups) &&
     Array.isArray(candidate.donationTypes) &&
-    !!candidate.communesByWilaya &&
-    typeof candidate.communesByWilaya === "object"
+    !!communesByWilaya &&
+    typeof communesByWilaya === "object" &&
+    Object.values(communesByWilaya).every(
+      (communes) =>
+        Array.isArray(communes) &&
+        communes.every(
+          (commune) =>
+            !!commune &&
+            typeof commune === "object" &&
+            "value" in commune &&
+            "label" in commune,
+        ),
+    )
   );
 }
 
@@ -168,6 +180,7 @@ export function AppointmentForm({ initialCampaignCode, onSuccess }: AppointmentF
 
   const isExistingDonor = form.watch("isExistingDonor");
   const selectedWilayaCode = form.watch("wilayaCode");
+  const selectedCommune = form.watch("commune");
   const selectedAppointmentDate = form.watch("appointmentDate");
   const selectedCampaignCode = form.watch("campaignCode");
   const safeMeta = isAppointmentFormMeta(meta) ? meta : localizedFallbackMeta;
@@ -190,6 +203,31 @@ export function AppointmentForm({ initialCampaignCode, onSuccess }: AppointmentF
     lastDonationDate: "appointment-last-donation-date",
     remarks: "appointment-remarks",
   } as const;
+
+  useEffect(() => {
+    if (!selectedWilayaCode) {
+      if (selectedCommune) {
+        form.setValue("commune", "", {
+          shouldDirty: false,
+          shouldTouch: false,
+          shouldValidate: true,
+        });
+      }
+
+      return;
+    }
+
+    if (
+      selectedCommune &&
+      !communeOptions.some((option) => option.value === selectedCommune)
+    ) {
+      form.setValue("commune", "", {
+        shouldDirty: false,
+        shouldTouch: false,
+        shouldValidate: true,
+      });
+    }
+  }, [communeOptions, form, selectedCommune, selectedWilayaCode]);
 
   useEffect(() => {
     if (!isUnlocked || !initialCampaignCode) {
@@ -760,13 +798,13 @@ export function AppointmentForm({ initialCampaignCode, onSuccess }: AppointmentF
               disabled={communeOptions.length === 0}
             >
               <option value="">
-                {communeOptions.length === 0
+              {communeOptions.length === 0
                   ? copy.hints.selectWilayaFirst
                   : copy.hints.selectCommune}
               </option>
               {communeOptions.map((commune) => (
-                <option key={commune} value={commune}>
-                  {commune}
+                <option key={commune.value} value={commune.value}>
+                  {commune.label}
                 </option>
               ))}
             </select>

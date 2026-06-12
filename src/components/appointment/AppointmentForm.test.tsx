@@ -32,8 +32,11 @@ vi.mock("@/lib/api/appointmentApi", async () => {
           { code: "09", label: "Blida" },
         ],
         communesByWilaya: {
-          "16": ["Sidi M'Hamed", "Bab El Oued"],
-          "09": ["Blida"],
+          "16": [
+            { value: "Sidi M'Hamed", label: "Sidi M'Hamed" },
+            { value: "Bab El Oued", label: "Bab El Oued" },
+          ],
+          "09": [{ value: "Blida", label: "Blida" }],
         },
         eligibilityChecklistTemplate: [],
       },
@@ -165,6 +168,33 @@ test("hydrates metadata-driven options after eligibility gate unlock", async () 
   expect(await screen.findByText("Alger")).toBeInTheDocument();
   expect(screen.getByText("Blida")).toBeInTheDocument();
   expect(screen.getByText("Don de plasma")).toBeInTheDocument();
+});
+
+test("resets the commune when the wilaya changes", async () => {
+  const user = userEvent.setup();
+
+  render(<AppointmentForm />);
+  await unlockForm(user);
+
+  const wilayaSelect = document.querySelector(
+    'select[name="wilayaCode"]',
+  ) as HTMLSelectElement;
+  const communeSelect = document.querySelector(
+    'select[name="commune"]',
+  ) as HTMLSelectElement;
+
+  await user.selectOptions(wilayaSelect, "16");
+  await user.selectOptions(communeSelect, "Sidi M'Hamed");
+  expect(communeSelect.value).toBe("Sidi M'Hamed");
+
+  await user.selectOptions(wilayaSelect, "09");
+
+  await waitFor(() => expect(communeSelect.value).toBe(""));
+  expect(
+    Array.from(communeSelect.options).some(
+      (option) => option.value === "Blida" && option.textContent === "Blida",
+    ),
+  ).toBe(true);
 });
 
 test("falls back to local metadata when the API metadata call fails", async () => {

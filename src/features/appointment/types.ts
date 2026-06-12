@@ -1,3 +1,8 @@
+export type SelectOption = {
+  value: string;
+  label: string;
+};
+
 export type AppointmentFormMeta = {
   locales: readonly ("fr" | "ar")[];
   genders: ReadonlyArray<{ value: "male" | "female"; label: string }>;
@@ -7,7 +12,7 @@ export type AppointmentFormMeta = {
     label: string;
   }>;
   wilayas: ReadonlyArray<{ code: string; label: string }>;
-  communesByWilaya: Record<string, readonly string[]>;
+  communesByWilaya: Record<string, ReadonlyArray<SelectOption>>;
   eligibilityChecklistTemplate: ReadonlyArray<{
     key:
       | "ageConfirmed"

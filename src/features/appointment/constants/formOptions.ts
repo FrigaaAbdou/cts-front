@@ -1,3 +1,9 @@
+import {
+  getCommunesByWilaya,
+  getWilayasByLocale,
+} from "@/features/appointment/constants/algeria-locations";
+import type { AppointmentFormMeta } from "@/features/appointment/types";
+
 export const bloodGroups = [
   "A+",
   "A-",
@@ -39,26 +45,8 @@ export function getFallbackAppointmentMeta(
             { value: "platelets", label: "التبرع بالصفائح" },
           ]
         : [...donationTypes],
-    wilayas:
-      locale === "ar"
-        ? [
-            { code: "16", label: "الجزائر" },
-            { code: "09", label: "البليدة" },
-            { code: "42", label: "تيبازة" },
-            { code: "15", label: "تيزي وزو" },
-          ]
-        : [
-            { code: "16", label: "Alger" },
-            { code: "09", label: "Blida" },
-            { code: "42", label: "Tipaza" },
-            { code: "15", label: "Tizi Ouzou" },
-          ],
-    communesByWilaya: {
-      "16": ["Sidi M'Hamed", "Bab El Oued", "El Madania"],
-      "09": ["Blida", "Bouarfa", "Ouled Yaich"],
-      "42": ["Tipaza", "Cherchell", "Kolea"],
-      "15": ["Tizi Ouzou", "Draa Ben Khedda", "Azazga"],
-    },
+    wilayas: getWilayasByLocale(locale),
+    communesByWilaya: getCommunesByWilaya(locale),
     eligibilityChecklistTemplate:
       locale === "ar"
         ? [
@@ -83,4 +71,3 @@ export function getFallbackAppointmentMeta(
 }
 
 export const fallbackAppointmentMeta = getFallbackAppointmentMeta("fr");
-import type { AppointmentFormMeta } from "@/features/appointment/types";
