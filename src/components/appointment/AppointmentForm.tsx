@@ -38,6 +38,30 @@ function getFallbackCampaignOptions(locale: "fr" | "ar") {
   ];
 }
 
+function getCampaignOperationalLabel(
+  status: "scheduled" | "ongoing" | "finished" | undefined,
+  locale: "fr" | "ar",
+) {
+  if (!status) {
+    return "";
+  }
+
+  const labels =
+    locale === "ar"
+      ? {
+          scheduled: "مجدولة",
+          ongoing: "جارية",
+          finished: "منتهية",
+        }
+      : {
+          scheduled: "Programmée",
+          ongoing: "En cours",
+          finished: "Terminée",
+        };
+
+  return labels[status];
+}
+
 type FieldProps = {
   label: string;
   error?: string;
@@ -407,7 +431,12 @@ export function AppointmentForm({ onSuccess }: AppointmentFormProps) {
             ...getFallbackCampaignOptions(locale),
             ...campaigns.map((campaign) => ({
               value: campaign.code,
-              label: campaign.title,
+              label: campaign.operationalStatus
+                ? `${campaign.title} · ${getCampaignOperationalLabel(
+                    campaign.operationalStatus,
+                    locale,
+                  )}`
+                : campaign.title,
             })),
           ]);
         }

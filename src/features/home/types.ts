@@ -128,6 +128,7 @@ export type CampaignItem = {
   title: string;
   description: string;
   status: string;
+  operationalStatus?: "scheduled" | "ongoing" | "finished";
   startDate: string | null;
   endDate: string | null;
   ctaLabel: string;
