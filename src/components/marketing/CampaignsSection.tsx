@@ -1,11 +1,16 @@
-import { ArrowRight, CalendarDays, CircleDot, Clock3, Sparkles } from "lucide-react";
+import {
+  ArrowRight,
+  CalendarDays,
+  CircleDot,
+  Clock3,
+  Sparkles,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 
 import { PageContainer } from "@/components/layout/PageContainer";
 import { SectionShell } from "@/components/layout/SectionShell";
 import type { CampaignItem } from "@/features/home/types";
 import { useLocale } from "@/i18n/locale";
-import { cn } from "@/lib/utils";
 
 type CampaignsSectionProps = {
   campaigns: CampaignItem[];
@@ -47,6 +52,149 @@ function getOperationalStatusLabel(
 
 function getCampaignLink(code: string) {
   return `/appointment?campaignCode=${encodeURIComponent(code)}`;
+}
+
+function CampaignFeatureCard({
+  campaign,
+  locale,
+  actionLabel,
+}: {
+  campaign: CampaignItem;
+  locale: "fr" | "ar";
+  actionLabel: string;
+}) {
+  const startLabel = formatCampaignDate(campaign.startDate, locale);
+  const endLabel = formatCampaignDate(campaign.endDate, locale);
+  const dateLabel =
+    startLabel && endLabel
+      ? `${startLabel} - ${endLabel}`
+      : startLabel ?? endLabel ?? "";
+
+  return (
+    <article className="overflow-hidden rounded-[2rem] border border-red-100 bg-white shadow-soft">
+      <div className="grid lg:grid-cols-[1.06fr_0.94fr]">
+        <div className="flex flex-col justify-between p-7 sm:p-9 lg:p-10">
+          <div>
+            <div className="inline-flex items-center gap-2 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-red">
+              <Sparkles className="h-3.5 w-3.5" />
+              {getOperationalStatusLabel(campaign.operationalStatus, locale)}
+            </div>
+
+            <h3 className="mt-5 max-w-xl text-3xl font-black leading-tight text-slate-950 sm:text-4xl">
+              {campaign.title}
+            </h3>
+
+            <p className="mt-5 max-w-xl text-base leading-8 text-slate-600">
+              {campaign.description}
+            </p>
+          </div>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 shrink-0 text-brand-red" />
+                <span className="font-medium text-slate-800">
+                  {dateLabel || (locale === "ar" ? "دون تاريخ محدد" : "Date non précisée")}
+                </span>
+              </div>
+              <p className="mt-2 text-xs leading-6 text-slate-500">
+                {locale === "ar"
+                  ? "يمكن للمتبرعين رؤية هذه الحملة وحجز موعد مرتبط بها."
+                  : "Les donneurs peuvent voir cette campagne et réserver dessus."}
+              </p>
+            </div>
+
+            <div className="rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
+              <div className="flex items-center gap-2">
+                <Clock3 className="h-4 w-4 shrink-0 text-brand-red" />
+                <span className="font-medium text-slate-800">
+                  {campaign.badgeLabel || campaign.code}
+                </span>
+              </div>
+              <p className="mt-2 text-xs leading-6 text-slate-500">
+                {locale === "ar"
+                  ? "حملة منشورة وفعالة في الواجهة العمومية."
+                  : "Campagne publiée et active sur le site public."}
+              </p>
+            </div>
+          </div>
+
+          <Link
+            to={getCampaignLink(campaign.code)}
+            className="mt-8 inline-flex w-fit items-center gap-2 rounded-2xl bg-brand-red px-6 py-3.5 text-base font-semibold text-white shadow-soft transition hover:bg-brand-dark"
+          >
+            {actionLabel}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+
+        <div className="relative min-h-[320px] overflow-hidden bg-[#f7f0ea] lg:min-h-[540px]">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.95),rgba(255,255,255,0.45)_34%,rgba(248,240,233,0.1)_70%)]" />
+          <img
+            src="/images/campaign-metro-donneur-illustration.jpeg"
+            alt={campaign.title}
+            className="absolute inset-0 h-full w-full object-contain object-center p-4 sm:p-6 lg:p-8"
+          />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white/70 to-transparent" />
+          <div className="absolute left-5 top-5 rounded-full border border-white/60 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-700 shadow-sm backdrop-blur">
+            {locale === "ar" ? "صورة الحملة" : "Visuel campagne"}
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function CampaignMiniCard({
+  campaign,
+  locale,
+  actionLabel,
+}: {
+  campaign: CampaignItem;
+  locale: "fr" | "ar";
+  actionLabel: string;
+}) {
+  const startLabel = formatCampaignDate(campaign.startDate, locale);
+  const endLabel = formatCampaignDate(campaign.endDate, locale);
+  const dateLabel =
+    startLabel && endLabel
+      ? `${startLabel} - ${endLabel}`
+      : startLabel ?? endLabel ?? "";
+
+  return (
+    <article className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-brand-red">
+            {getOperationalStatusLabel(campaign.operationalStatus, locale)}
+          </p>
+          <h4 className="mt-2 text-lg font-black leading-tight text-slate-950">
+            {campaign.title}
+          </h4>
+        </div>
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-red-50 text-brand-red">
+          <CircleDot className="h-4 w-4" />
+        </div>
+      </div>
+
+      <p className="mt-3 text-sm leading-6 text-slate-600 line-clamp-3">
+        {campaign.description}
+      </p>
+
+      <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-500">
+        <span className="rounded-full bg-slate-50 px-3 py-1">{dateLabel || (locale === "ar" ? "دون تاريخ" : "Date non précisée")}</span>
+        <span className="rounded-full bg-slate-50 px-3 py-1">{campaign.badgeLabel || campaign.code}</span>
+      </div>
+
+      <Link
+        to={getCampaignLink(campaign.code)}
+        className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-red transition hover:gap-3"
+      >
+        {actionLabel}
+        <ArrowRight className="h-4 w-4" />
+      </Link>
+    </article>
+  );
 }
 
 export function CampaignsSection({ campaigns }: CampaignsSectionProps) {
@@ -91,63 +239,25 @@ export function CampaignsSection({ campaigns }: CampaignsSectionProps) {
         </p>
 
         {campaigns.length > 0 ? (
-          <div className="mt-12 grid gap-6 lg:grid-cols-3">
-            {campaigns.slice(0, 3).map((campaign, index) => {
-              const startLabel = formatCampaignDate(campaign.startDate, locale);
-              const endLabel = formatCampaignDate(campaign.endDate, locale);
-              const dateLabel =
-                startLabel && endLabel
-                  ? `${startLabel} - ${endLabel}`
-                  : startLabel ?? endLabel ?? copy.noDates;
+          <div className="mt-12 space-y-6">
+            <CampaignFeatureCard
+              campaign={campaigns[0]}
+              locale={locale}
+              actionLabel={copy.actionLabel}
+            />
 
-              return (
-                <article
-                  key={campaign.code}
-                  className={cn(
-                    "group rounded-[1.75rem] border bg-white p-7 shadow-soft transition hover:-translate-y-1 hover:shadow-lg",
-                    index === 0 ? "border-red-200 bg-gradient-to-b from-red-50 to-white" : "border-slate-100",
-                  )}
-                >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="inline-flex items-center gap-2 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-red">
-                        <Sparkles className="h-3.5 w-3.5" />
-                        {getOperationalStatusLabel(campaign.operationalStatus, locale)}
-                      </div>
-                      <h3 className="mt-4 text-2xl font-black leading-tight text-slate-950">
-                        {campaign.title}
-                      </h3>
-                    </div>
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand-red text-white shadow-soft">
-                      <CircleDot className="h-5 w-5" />
-                    </div>
-                  </div>
-
-                  <p className="mt-4 text-sm leading-7 text-slate-600">
-                    {campaign.description}
-                  </p>
-
-                  <div className="mt-6 space-y-3 rounded-2xl bg-slate-50 px-4 py-4 text-sm text-slate-600">
-                    <div className="flex items-center gap-2">
-                      <CalendarDays className="h-4 w-4 shrink-0 text-brand-red" />
-                      <span>{dateLabel}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock3 className="h-4 w-4 shrink-0 text-brand-red" />
-                      <span>{campaign.badgeLabel || campaign.code}</span>
-                    </div>
-                  </div>
-
-                  <Link
-                    to={getCampaignLink(campaign.code)}
-                    className="mt-6 inline-flex items-center gap-2 text-base font-semibold text-brand-red transition hover:gap-3"
-                  >
-                    {copy.actionLabel}
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </article>
-              );
-            })}
+            {campaigns.length > 1 ? (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {campaigns.slice(1, 4).map((campaign) => (
+                  <CampaignMiniCard
+                    key={campaign.code}
+                    campaign={campaign}
+                    locale={locale}
+                    actionLabel={copy.actionLabel}
+                  />
+                ))}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="mx-auto mt-12 max-w-3xl rounded-[1.75rem] border border-slate-200 bg-white p-10 text-center shadow-soft">
