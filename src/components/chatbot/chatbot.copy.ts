@@ -25,11 +25,12 @@ const COPY: Record<ChatbotLocale, ChatbotCopy> = {
     quickReplies: [
       "Qui peut donner son sang ?",
       "Comment prendre rendez-vous ?",
-      "Quelles sont les contre-indications ?",
+      "Quelles situations peuvent reporter un don ?",
+      "Comment me preparer avant de venir ?",
       "Quelle campagne est active ?",
     ],
     welcomeMessage:
-      "Bonjour. Je peux vous aider sur les questions generales de don du sang, de rendez-vous et de campagnes en cours.",
+      "Bonjour. Je peux vous aider sur l'eligibilite generale, les rendez-vous, les campagnes et la preparation avant don.",
   },
   ar: {
     launcherLabel: "Chatbot",
@@ -43,11 +44,12 @@ const COPY: Record<ChatbotLocale, ChatbotCopy> = {
     quickReplies: [
       "من يمكنه التبرع بالدم؟",
       "كيف أحجز موعدا؟",
-      "ما هي موانع التبرع؟",
+      "ما الحالات التي قد تؤجل التبرع؟",
+      "كيف أستعد قبل الحضور؟",
       "ما هي الحملة النشطة حاليا؟",
     ],
     welcomeMessage:
-      "مرحبا. يمكنني مساعدتك في الأسئلة العامة حول التبرع بالدم، حجز الموعد والحملات الجارية.",
+      "مرحبا. يمكنني مساعدتك في الأهلية العامة، وحجز الموعد، والحملات، والاستعداد قبل التبرع.",
   },
 };
 
