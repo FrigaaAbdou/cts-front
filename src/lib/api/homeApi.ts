@@ -14,14 +14,13 @@ export const homeFallbackContent: HomePageContent = {
     ctaLabel: "Je donne maintenant",
   },
   impact: {
-    sectionLabel: "Campagne permanente de sensibilisation",
-    title: "Notre Impact",
+    sectionLabel: "Chaque don compte",
+    title: "Un geste simple qui soutient les urgences, la chirurgie et l'oncologie",
     description:
-      "Un don régulier soutient directement les besoins transfusionnels des établissements hospitaliers et des urgences vitales.",
+      "Le don de sang reste indispensable pour maintenir des réserves stables au CHU Mustapha et accompagner les patients qui en ont besoin chaque jour.",
     stats: [
-      { label: "Donneurs mobilisés par jour", value: "135+" },
-      { label: "Prise en charge et suivi coordonnés", value: "24h" },
-      { label: "Procédure encadrée et sécurisée", value: "100%" },
+      { label: "Jusqu'à 3 donneurs par créneau", value: "3" },
+      { label: "Besoin en collecte régulière", value: "Quotidien" },
     ],
   },
   eligibilityPreview: {
@@ -96,14 +95,13 @@ export function getHomeFallbackContent(locale: "fr" | "ar"): HomePageContent {
         ctaLabel: "أتبرع الآن",
       },
       impact: {
-        sectionLabel: "حملة توعوية مستمرة",
-        title: "أثرنا",
+        sectionLabel: "كل تبرع مهم",
+        title: "لفتة بسيطة تدعم الاستعجالات والجراحة وطب الأورام",
         description:
-          "التبرع المنتظم يدعم مباشرة احتياجات نقل الدم في المؤسسات الاستشفائية وحالات الاستعجال الحيوية.",
+          "يبقى التبرع بالدم ضروريا للحفاظ على مخزون مستقر في المستشفى الجامعي مصطفى ومرافقة المرضى الذين يحتاجون إليه كل يوم.",
         stats: [
-          { label: "متبرعون تتم تعبئتهم يوميا", value: "135+" },
-          { label: "تكفل ومتابعة منسقة", value: "24h" },
-          { label: "إجراء مؤطر وآمن", value: "100%" },
+          { label: "حتى 3 متبرعين في كل موعد", value: "3" },
+          { label: "حاجة يومية إلى جمع منتظم", value: "يومي" },
         ],
       },
       eligibilityPreview: {
