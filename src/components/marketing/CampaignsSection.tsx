@@ -153,15 +153,40 @@ export function CampaignsSection({ campaigns }: CampaignsSectionProps) {
         </p>
 
         {campaigns.length > 0 ? (
-          <div className="mt-12 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {campaigns.slice(0, 6).map((campaign) => (
-              <CampaignCard
-                key={campaign.code}
-                campaign={campaign}
-                locale={locale}
-                actionLabel={copy.actionLabel}
-              />
-            ))}
+          <div className="mt-12">
+            <div className="mb-4 flex items-center justify-between gap-4">
+              <p className="text-sm font-medium text-slate-500">
+                {locale === "ar"
+                  ? "اسحب أفقيًا لاستكشاف الحملات"
+                  : "Faites défiler horizontalement pour voir les campagnes"}
+              </p>
+              <div className="hidden sm:flex items-center gap-2 text-xs font-medium text-slate-400">
+                <span>1</span>
+                <span className="h-px w-8 bg-slate-200" />
+                <span>2</span>
+                <span className="h-px w-8 bg-slate-200" />
+                <span>3+</span>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div
+                className={`flex gap-4 ${campaigns.length <= 2 ? "justify-center" : "justify-start"} px-1`}
+              >
+                {campaigns.slice(0, 6).map((campaign) => (
+                  <div
+                    key={campaign.code}
+                    className="min-w-[18rem] max-w-[18rem] shrink-0 snap-center sm:min-w-[20rem] sm:max-w-[20rem] lg:min-w-[21rem] lg:max-w-[21rem]"
+                  >
+                    <CampaignCard
+                      campaign={campaign}
+                      locale={locale}
+                      actionLabel={copy.actionLabel}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         ) : (
           <div className="mx-auto mt-12 max-w-3xl rounded-[1.75rem] border border-slate-200 bg-white p-10 text-center shadow-soft">
