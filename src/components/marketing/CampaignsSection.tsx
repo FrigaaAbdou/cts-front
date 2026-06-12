@@ -115,6 +115,10 @@ function CampaignCard({
 
 export function CampaignsSection({ campaigns }: CampaignsSectionProps) {
   const { locale } = useLocale();
+  const highlightedCampaign =
+    campaigns.find((campaign) => campaign.code === "JMD-2026-METRO-DONNEUR-2026") ??
+    campaigns[0] ??
+    null;
   const copy =
     locale === "ar"
       ? {
@@ -152,10 +156,10 @@ export function CampaignsSection({ campaigns }: CampaignsSectionProps) {
           {copy.description}
         </p>
 
-        {campaigns.length > 0 ? (
+        {highlightedCampaign ? (
           <div className="mx-auto mt-12 max-w-xl">
             <CampaignCard
-              campaign={campaigns[0]}
+              campaign={highlightedCampaign}
               locale={locale}
               actionLabel={copy.actionLabel}
             />
