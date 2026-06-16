@@ -74,7 +74,9 @@ import {
 const copy = {
   title: "Calendrier",
   description:
-    "Lecture mensuelle des disponibilités, des rendez-vous et des créneaux configurés.",
+    "Lecture mensuelle des disponibilités, des rendez-vous et des créneaux configurés pour le centre.",
+  campaignDescription:
+    "Lecture des créneaux opérationnels liés à une campagne publiée.",
   monthCard: "Vue mensuelle",
   dayCard: "Détail de la journée",
   templatesCard: "Règles hebdomadaires",
@@ -83,8 +85,16 @@ const copy = {
   calendarCampaignRange: "Période",
   calendarCampaignCode: "Code",
   calendarCampaignStatus: "Statut",
+  campaignPlanningTitle: "Planification opérationnelle de campagne",
   campaignCalendarHelper:
     "Les dates de campagne sont définies par l’équipe communication. Le calendrier ne modifie que l’organisation opérationnelle.",
+  campaignCommunicationTitle: "Communication",
+  campaignOperationsTitle: "Opérations",
+  campaignCommunicationNote:
+    "L’équipe communication fixe les dates de début et de fin de la campagne.",
+  campaignOperationsNote:
+    "L’équipe opérations ajuste uniquement les horaires, capacités, fermetures et exceptions.",
+  campaignOperationsListLabel: "Modifiable côté opérations",
   editTemplates: "Modifier les règles",
   templatesSheetTitle: "Règles hebdomadaires",
   templatesSheetDescription:
@@ -620,6 +630,8 @@ export function AdminCalendarPage() {
       closed: values.filter((day) => day.status === "closed").length,
     };
   }, [monthData]);
+
+  const pageDescription = selectedCampaign ? copy.campaignDescription : copy.description;
 
   if (
     errorMessage &&
@@ -1469,7 +1481,8 @@ export function AdminCalendarPage() {
       </Dialog>
 
       <Card className="border-slate-200/80 bg-white shadow-sm">
-        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
+        <CardContent className="flex flex-col gap-5 p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-2">
             <label htmlFor="calendar-scope-trigger" className="text-sm font-medium text-slate-500">
               {copy.calendarSelectorLabel}
@@ -1494,36 +1507,76 @@ export function AdminCalendarPage() {
               </SelectContent>
             </Select>
           </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedCampaign ? (
-                  <>
-                    <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
-                      {copy.calendarCampaignCode}: {selectedCampaign.code}
-                    </Badge>
-                    <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
-                      {copy.calendarCampaignRange}: {selectedCampaignBounds?.startKey} → {selectedCampaignBounds?.endKey}
-                    </Badge>
-                    <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
-                      {copy.calendarCampaignStatus}: {selectedCampaign.operationalStatus}
-                    </Badge>
-                  </>
-                ) : (
-                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
-                    {copy.calendarGeneralOption}
-                  </Badge>
-                )}
-              </div>
+            <div className="flex flex-wrap gap-2">
               {selectedCampaign ? (
-                <p className="max-w-3xl text-sm leading-6 text-slate-500">
+                <>
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.calendarCampaignCode}: {selectedCampaign.code}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.calendarCampaignRange}: {selectedCampaignBounds?.startKey} → {selectedCampaignBounds?.endKey}
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.calendarCampaignStatus}: {selectedCampaign.operationalStatus}
+                  </Badge>
+                </>
+              ) : (
+                <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                  {copy.calendarGeneralOption}
+                </Badge>
+              )}
+            </div>
+          </div>
+
+          {selectedCampaign ? (
+            <div className="grid gap-3 rounded-3xl border border-slate-200 bg-slate-50/80 p-4 lg:grid-cols-2">
+              <div className="lg:col-span-2">
+                <p className="text-sm font-semibold text-slate-950">
+                  {copy.campaignPlanningTitle}
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-500">
                   {copy.campaignCalendarHelper}
                 </p>
-              ) : null}
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  {copy.campaignCommunicationTitle}
+                </p>
+                <p className="text-sm font-semibold text-slate-950">{selectedCampaign.title}</p>
+                <p className="text-sm leading-6 text-slate-600">{copy.campaignCommunicationNote}</p>
+              </div>
+              <div className="space-y-2 rounded-2xl border border-dashed border-slate-300 bg-white p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-slate-500">
+                  {copy.campaignOperationsTitle}
+                </p>
+                <p className="text-sm leading-6 text-slate-600">{copy.campaignOperationsNote}</p>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.campaignOperationsListLabel}: horaires
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.campaignOperationsListLabel}: capacités
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.campaignOperationsListLabel}: fermetures
+                  </Badge>
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.campaignOperationsListLabel}: exceptions
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <p className="max-w-3xl text-sm leading-6 text-slate-500">
+              {copy.description}
+            </p>
+          )}
             </CardContent>
           </Card>
 
       <AdminPageHeader
         title={copy.title}
-        description={copy.description}
+        description={pageDescription}
         actions={
           <Button
             type="button"

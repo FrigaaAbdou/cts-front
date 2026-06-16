@@ -109,6 +109,11 @@ describe("AdminCalendarPage", () => {
     );
 
     expect(await screen.findByRole("heading", { name: "Calendrier" })).toBeInTheDocument();
+    expect(
+      screen.getAllByText(
+        "Lecture mensuelle des disponibilités, des rendez-vous et des créneaux configurés pour le centre.",
+      ).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByText("Vue mensuelle")).toBeInTheDocument();
     expect(screen.getByText("Détail de la journée")).toBeInTheDocument();
     expect(screen.getByText("Règles hebdomadaires")).toBeInTheDocument();
@@ -226,11 +231,26 @@ describe("AdminCalendarPage", () => {
     expect(screen.getByText("Code: SOLIDARITE-2026")).toBeInTheDocument();
     expect(screen.getByText("Période: 2026-06-20 → 2026-06-30")).toBeInTheDocument();
     expect(screen.getByText("Statut: ongoing")).toBeInTheDocument();
+    expect(screen.getByText("Planification opérationnelle de campagne")).toBeInTheDocument();
     expect(
       screen.getByText(
         "Les dates de campagne sont définies par l’équipe communication. Le calendrier ne modifie que l’organisation opérationnelle.",
       ),
     ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "L’équipe communication fixe les dates de début et de fin de la campagne.",
+      ),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        "L’équipe opérations ajuste uniquement les horaires, capacités, fermetures et exceptions.",
+      ),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Modifiable côté opérations: horaires")).toBeInTheDocument();
+    expect(screen.getByText("Modifiable côté opérations: capacités")).toBeInTheDocument();
+    expect(screen.getByText("Modifiable côté opérations: fermetures")).toBeInTheDocument();
+    expect(screen.getByText("Modifiable côté opérations: exceptions")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: "Go to the Previous Month" }),
     ).toHaveAttribute("aria-disabled", "true");
