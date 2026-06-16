@@ -20,6 +20,7 @@ import { useAdminAuth, isUnauthorizedAdminError } from "@/features/admin-auth/Ad
 import {
   closeAdminCalendarDay,
   createAdminCalendarSlot,
+  listAdminCalendarCampaignSelectorItems,
   getAdminCalendarDay,
   getAdminCalendarMonth,
   listAdminCalendarTemplates,
@@ -27,6 +28,7 @@ import {
   reopenAdminCalendarDay,
   updateAdminCalendarSlot,
   type AdminCalendarDaySlot,
+  type AdminCalendarCampaignSelectorItem,
   type AdminCalendarTemplateItem,
 } from "@/lib/api/adminCalendarApi";
 import { Badge } from "@/components/ui/badge";
@@ -76,6 +78,13 @@ const copy = {
   monthCard: "Vue mensuelle",
   dayCard: "Détail de la journée",
   templatesCard: "Règles hebdomadaires",
+  calendarSelectorLabel: "Calendrier",
+  calendarGeneralOption: "Calendrier general",
+  calendarCampaignRange: "Période",
+  calendarCampaignCode: "Code",
+  calendarCampaignStatus: "Statut",
+  campaignCalendarHelper:
+    "Les dates de campagne sont définies par l’équipe communication. Le calendrier ne modifie que l’organisation opérationnelle.",
   editTemplates: "Modifier les règles",
   templatesSheetTitle: "Règles hebdomadaires",
   templatesSheetDescription:
@@ -200,8 +209,12 @@ function formatDateKey(date: Date) {
 }
 
 function parseDateKey(date: string) {
-  const [year, month, day] = date.split("-").map(Number);
+  const [year, month, day] = date.slice(0, 10).split("-").map(Number);
   return new Date(year, month - 1, day);
+}
+
+function isDateWithinRange(date: Date, startDate: Date, endDate: Date) {
+  return date.getTime() >= startDate.getTime() && date.getTime() <= endDate.getTime();
 }
 
 function timeToMinutes(value: string) {
@@ -298,6 +311,7 @@ type SlotEditorState = {
 
 type TemplateEditorRow = {
   id: string;
+  campaignCode: string | null;
   daysOfWeek: string[];
   startTime: string;
   endTime: string;
@@ -338,6 +352,7 @@ function createTemplateEditorRow(
 ): TemplateEditorRow {
   return {
     id: item?.id ?? `draft-${Math.random().toString(36).slice(2, 10)}`,
+    campaignCode: item?.campaignCode ?? null,
     daysOfWeek: (item?.daysOfWeek?.length ? item.daysOfWeek : [1]).map(String),
     startTime: item?.startTime ?? "08:00",
     endTime: item?.endTime ?? "12:00",
@@ -365,9 +380,14 @@ export function AdminCalendarPage() {
     null,
   );
   const [templates, setTemplates] = useState<AdminCalendarTemplateItem[]>([]);
+  const [campaignSelectorItems, setCampaignSelectorItems] = useState<
+    AdminCalendarCampaignSelectorItem[]
+  >([]);
+  const [selectedCalendarCode, setSelectedCalendarCode] = useState<string>("general");
   const [isLoadingMonth, setIsLoadingMonth] = useState(true);
   const [isLoadingDay, setIsLoadingDay] = useState(true);
   const [isLoadingTemplates, setIsLoadingTemplates] = useState(true);
+  const [isLoadingCalendarSelector, setIsLoadingCalendarSelector] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [slotSheetOpen, setSlotSheetOpen] = useState(false);
@@ -391,6 +411,40 @@ export function AdminCalendarPage() {
 
   const monthKey = formatMonthKey(visibleMonth);
   const selectedDateKey = formatDateKey(selectedDate);
+  const selectedCampaign = useMemo(
+    () => campaignSelectorItems.find((item) => item.code === selectedCalendarCode) ?? null,
+    [campaignSelectorItems, selectedCalendarCode],
+  );
+  const selectedCampaignBounds = useMemo(() => {
+    if (!selectedCampaign) {
+      return null;
+    }
+
+    const startDate = parseDateKey(selectedCampaign.startDate);
+    const endDate = parseDateKey(selectedCampaign.endDate);
+
+    return {
+      startDate,
+      endDate,
+      startMonth: new Date(startDate.getFullYear(), startDate.getMonth(), 1),
+      endMonth: new Date(endDate.getFullYear(), endDate.getMonth(), 1),
+      startKey: formatDateKey(startDate),
+      endKey: formatDateKey(endDate),
+    };
+  }, [selectedCampaign]);
+  const activeCalendarScope = useMemo(
+    () =>
+      selectedCampaign
+        ? {
+            context: "campaign" as const,
+            campaignCode: selectedCampaign.code,
+          }
+        : {
+            context: "general" as const,
+            campaignCode: null,
+          },
+    [selectedCampaign],
+  );
 
   async function loadMonth() {
     if (!token) {
@@ -403,7 +457,7 @@ export function AdminCalendarPage() {
     setErrorMessage(null);
 
     try {
-      const data = await getAdminCalendarMonth(token, monthKey);
+      const data = await getAdminCalendarMonth(token, monthKey, activeCalendarScope);
       setMonthData(data);
     } catch (error) {
       if (isUnauthorizedAdminError(error)) {
@@ -428,7 +482,7 @@ export function AdminCalendarPage() {
     setIsLoadingDay(true);
 
     try {
-      const data = await getAdminCalendarDay(token, selectedDateKey);
+      const data = await getAdminCalendarDay(token, selectedDateKey, activeCalendarScope);
       setDayData(data);
     } catch (error) {
       if (isUnauthorizedAdminError(error)) {
@@ -453,7 +507,7 @@ export function AdminCalendarPage() {
     setIsLoadingTemplates(true);
 
     try {
-      const data = await listAdminCalendarTemplates(token);
+      const data = await listAdminCalendarTemplates(token, activeCalendarScope);
       setTemplates(data);
     } catch (error) {
       if (isUnauthorizedAdminError(error)) {
@@ -468,17 +522,55 @@ export function AdminCalendarPage() {
     }
   }
 
+  async function loadCalendarSelector() {
+    if (!token) {
+      setErrorMessage(copy.loadError);
+      setIsLoadingCalendarSelector(false);
+      return;
+    }
+
+    setIsLoadingCalendarSelector(true);
+
+    try {
+      const data = await listAdminCalendarCampaignSelectorItems(token);
+      setCampaignSelectorItems(data);
+    } catch (error) {
+      if (isUnauthorizedAdminError(error)) {
+        await logout();
+        return;
+      }
+
+      setErrorMessage(copy.loadError);
+      setCampaignSelectorItems([]);
+    } finally {
+      setIsLoadingCalendarSelector(false);
+    }
+  }
+
   useEffect(() => {
     void loadMonth();
-  }, [token, monthKey]);
+  }, [token, monthKey, activeCalendarScope]);
 
   useEffect(() => {
     void loadDay();
-  }, [token, selectedDateKey]);
+  }, [token, selectedDateKey, activeCalendarScope]);
 
   useEffect(() => {
     void loadTemplates();
+  }, [token, activeCalendarScope]);
+
+  useEffect(() => {
+    void loadCalendarSelector();
   }, [token]);
+
+  useEffect(() => {
+    if (!selectedCampaignBounds) {
+      return;
+    }
+
+    setVisibleMonth(selectedCampaignBounds.startDate);
+    setSelectedDate(selectedCampaignBounds.startDate);
+  }, [selectedCampaignBounds]);
 
   const dayStatusMap = useMemo(() => {
     return new Map((monthData?.days ?? []).map((day) => [day.date, day.status]));
@@ -641,9 +733,9 @@ export function AdminCalendarPage() {
           capacity: payload.capacity,
           status: payload.status,
           reason: payload.reason,
-        });
+        }, activeCalendarScope);
       } else {
-        await createAdminCalendarSlot(token, payload);
+        await createAdminCalendarSlot(token, payload, activeCalendarScope);
       }
 
       setFeedback(copy.slotSaved);
@@ -701,7 +793,7 @@ export function AdminCalendarPage() {
               ? "Jour off"
               : undefined,
         closureType: pendingDayClosureType,
-      });
+      }, activeCalendarScope);
       setCloseDayDialogOpen(false);
       setFeedback(copy.dayClosedSuccess);
       await refreshCalendarViews();
@@ -723,7 +815,7 @@ export function AdminCalendarPage() {
     setFeedback(null);
 
     try {
-      await reopenAdminCalendarDay(token, { date: selectedDateKey });
+      await reopenAdminCalendarDay(token, { date: selectedDateKey }, activeCalendarScope);
       setReopenDayDialogOpen(false);
       setFeedback(copy.dayReopenedSuccess);
       await refreshCalendarViews();
@@ -756,7 +848,7 @@ export function AdminCalendarPage() {
         donationTypes: row.donationTypes,
       }));
 
-      const data = await replaceAdminCalendarTemplates(token, items);
+      const data = await replaceAdminCalendarTemplates(token, items, activeCalendarScope);
       setTemplates(data);
       setTemplatesSheetOpen(false);
       setFeedback(copy.templatesSaved);
@@ -1376,6 +1468,59 @@ export function AdminCalendarPage() {
         </DialogContent>
       </Dialog>
 
+      <Card className="border-slate-200/80 bg-white shadow-sm">
+        <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:justify-between">
+          <div className="space-y-2">
+            <label htmlFor="calendar-scope-trigger" className="text-sm font-medium text-slate-500">
+              {copy.calendarSelectorLabel}
+            </label>
+            <Select
+              value={selectedCalendarCode}
+              onValueChange={(value) => {
+                setSelectedCalendarCode(value);
+              }}
+              disabled={isLoadingCalendarSelector}
+            >
+              <SelectTrigger id="calendar-scope-trigger" className="min-w-[280px] rounded-2xl">
+                <SelectValue placeholder={copy.calendarGeneralOption} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="general">{copy.calendarGeneralOption}</SelectItem>
+                {campaignSelectorItems.map((item) => (
+                  <SelectItem key={item.code} value={item.code}>
+                    {item.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+              <div className="flex flex-wrap gap-2">
+                {selectedCampaign ? (
+                  <>
+                    <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                      {copy.calendarCampaignCode}: {selectedCampaign.code}
+                    </Badge>
+                    <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                      {copy.calendarCampaignRange}: {selectedCampaignBounds?.startKey} → {selectedCampaignBounds?.endKey}
+                    </Badge>
+                    <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                      {copy.calendarCampaignStatus}: {selectedCampaign.operationalStatus}
+                    </Badge>
+                  </>
+                ) : (
+                  <Badge variant="outline" className="rounded-full border-slate-200 bg-slate-50">
+                    {copy.calendarGeneralOption}
+                  </Badge>
+                )}
+              </div>
+              {selectedCampaign ? (
+                <p className="max-w-3xl text-sm leading-6 text-slate-500">
+                  {copy.campaignCalendarHelper}
+                </p>
+              ) : null}
+            </CardContent>
+          </Card>
+
       <AdminPageHeader
         title={copy.title}
         description={copy.description}
@@ -1385,7 +1530,7 @@ export function AdminCalendarPage() {
             variant="outline"
             className="rounded-2xl"
             onClick={() => {
-              void Promise.all([loadMonth(), loadDay(), loadTemplates()]);
+              void Promise.all([loadMonth(), loadDay(), loadTemplates(), loadCalendarSelector()]);
             }}
           >
             <RefreshCcw data-icon="inline-start" />
@@ -1421,10 +1566,45 @@ export function AdminCalendarPage() {
                     <Calendar
                       mode="single"
                       month={visibleMonth}
+                      startMonth={selectedCampaignBounds?.startMonth}
+                      endMonth={selectedCampaignBounds?.endMonth}
+                      disabled={
+                        selectedCampaignBounds
+                          ? [
+                              {
+                                before: selectedCampaignBounds.startDate,
+                              },
+                              {
+                                after: selectedCampaignBounds.endDate,
+                              },
+                            ]
+                          : undefined
+                      }
                       selected={selectedDate}
-                      onMonthChange={setVisibleMonth}
+                      onMonthChange={(nextMonth) => {
+                        if (
+                          selectedCampaignBounds &&
+                          !isDateWithinRange(
+                            nextMonth,
+                            selectedCampaignBounds.startMonth,
+                            selectedCampaignBounds.endMonth,
+                          )
+                        ) {
+                          return;
+                        }
+
+                        setVisibleMonth(nextMonth);
+                      }}
                       onSelect={(date) => {
-                        if (date) {
+                        if (
+                          date &&
+                          (!selectedCampaignBounds ||
+                            isDateWithinRange(
+                              date,
+                              selectedCampaignBounds.startDate,
+                              selectedCampaignBounds.endDate,
+                            ))
+                        ) {
                           setSelectedDate(date);
                         }
                       }}
