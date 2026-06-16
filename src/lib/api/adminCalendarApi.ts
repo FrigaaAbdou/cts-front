@@ -1,9 +1,28 @@
 import { apiRequest } from "@/lib/api/client";
 
+export type AdminCalendarContext = "general" | "campaign";
+export type AdminCalendarScope = {
+  context?: AdminCalendarContext;
+  campaignCode?: string | null;
+};
+
 function createAdminHeaders(token: string) {
   return {
     Authorization: `Bearer ${token}`,
   };
+}
+
+function appendCalendarScope(
+  params: URLSearchParams,
+  scope?: AdminCalendarScope,
+) {
+  if (scope?.context) {
+    params.set("context", scope.context);
+  }
+
+  if (scope?.campaignCode) {
+    params.set("campaignCode", scope.campaignCode);
+  }
 }
 
 export type AdminCalendarDayStatus =
@@ -38,6 +57,7 @@ export type AdminCalendarDayClosureType = "generic" | "day_off" | "holiday";
 
 export type AdminCalendarTemplateItem = {
   id: string;
+  campaignCode: string | null;
   daysOfWeek: number[];
   startTime: string;
   endTime: string;
@@ -45,6 +65,14 @@ export type AdminCalendarTemplateItem = {
   capacity: number;
   isActive: boolean;
   donationTypes: Array<"whole_blood" | "plasma" | "platelets">;
+};
+
+export type AdminCalendarCampaignSelectorItem = {
+  code: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  operationalStatus: "scheduled" | "ongoing";
 };
 
 export type AdminCalendarSlotPayload = {
@@ -89,6 +117,12 @@ type AdminCalendarTemplatesResponse = {
   };
 };
 
+type AdminCalendarCampaignSelectorResponse = {
+  data: {
+    items: AdminCalendarCampaignSelectorItem[];
+  };
+};
+
 type AdminCalendarSlotMutationResponse = {
   data: {
     item: {
@@ -113,9 +147,16 @@ type AdminCalendarDayActionResponse = {
   };
 };
 
-export async function getAdminCalendarMonth(token: string, month: string) {
+export async function getAdminCalendarMonth(
+  token: string,
+  month: string,
+  scope?: AdminCalendarScope,
+) {
+  const params = new URLSearchParams({ month });
+  appendCalendarScope(params, scope);
+
   const payload = await apiRequest<AdminCalendarMonthResponse>(
-    `/api/admin/calendar/month?month=${month}`,
+    `/api/admin/calendar/month?${params.toString()}`,
     {
       headers: createAdminHeaders(token),
     },
@@ -124,9 +165,16 @@ export async function getAdminCalendarMonth(token: string, month: string) {
   return payload.data;
 }
 
-export async function getAdminCalendarDay(token: string, date: string) {
+export async function getAdminCalendarDay(
+  token: string,
+  date: string,
+  scope?: AdminCalendarScope,
+) {
+  const params = new URLSearchParams({ date });
+  appendCalendarScope(params, scope);
+
   const payload = await apiRequest<AdminCalendarDayResponse>(
-    `/api/admin/calendar/day?date=${date}`,
+    `/api/admin/calendar/day?${params.toString()}`,
     {
       headers: createAdminHeaders(token),
     },
@@ -135,9 +183,26 @@ export async function getAdminCalendarDay(token: string, date: string) {
   return payload.data;
 }
 
-export async function listAdminCalendarTemplates(token: string) {
+export async function listAdminCalendarCampaignSelectorItems(token: string) {
+  const payload = await apiRequest<AdminCalendarCampaignSelectorResponse>(
+    "/api/admin/campaigns/calendar-selector",
+    {
+      headers: createAdminHeaders(token),
+    },
+  );
+
+  return payload.data.items;
+}
+
+export async function listAdminCalendarTemplates(
+  token: string,
+  scope?: AdminCalendarScope,
+) {
+  const params = new URLSearchParams();
+  appendCalendarScope(params, scope);
+
   const payload = await apiRequest<AdminCalendarTemplatesResponse>(
-    "/api/admin/calendar/templates",
+    `/api/admin/calendar/templates${params.toString() ? `?${params.toString()}` : ""}`,
     {
       headers: createAdminHeaders(token),
     },
@@ -157,9 +222,13 @@ export async function replaceAdminCalendarTemplates(
     isActive: boolean;
     donationTypes?: Array<"whole_blood" | "plasma" | "platelets">;
   }>,
+  scope?: AdminCalendarScope,
 ) {
+  const params = new URLSearchParams();
+  appendCalendarScope(params, scope);
+
   const payload = await apiRequest<AdminCalendarTemplatesResponse>(
-    "/api/admin/calendar/templates",
+    `/api/admin/calendar/templates${params.toString() ? `?${params.toString()}` : ""}`,
     {
       method: "PUT",
       headers: createAdminHeaders(token),
@@ -173,9 +242,13 @@ export async function replaceAdminCalendarTemplates(
 export async function createAdminCalendarSlot(
   token: string,
   payload: AdminCalendarSlotPayload,
+  scope?: AdminCalendarScope,
 ) {
+  const params = new URLSearchParams();
+  appendCalendarScope(params, scope);
+
   const response = await apiRequest<AdminCalendarSlotMutationResponse>(
-    "/api/admin/calendar/slots",
+    `/api/admin/calendar/slots${params.toString() ? `?${params.toString()}` : ""}`,
     {
       method: "POST",
       headers: createAdminHeaders(token),
@@ -190,9 +263,13 @@ export async function updateAdminCalendarSlot(
   token: string,
   id: string,
   payload: AdminCalendarSlotUpdatePayload,
+  scope?: AdminCalendarScope,
 ) {
+  const params = new URLSearchParams();
+  appendCalendarScope(params, scope);
+
   const response = await apiRequest<AdminCalendarSlotMutationResponse>(
-    `/api/admin/calendar/slots/${id}`,
+    `/api/admin/calendar/slots/${id}${params.toString() ? `?${params.toString()}` : ""}`,
     {
       method: "PATCH",
       headers: createAdminHeaders(token),
@@ -206,9 +283,13 @@ export async function updateAdminCalendarSlot(
 export async function closeAdminCalendarDay(
   token: string,
   payload: { date: string; reason?: string; closureType?: AdminCalendarDayClosureType },
+  scope?: AdminCalendarScope,
 ) {
+  const params = new URLSearchParams();
+  appendCalendarScope(params, scope);
+
   const response = await apiRequest<AdminCalendarDayActionResponse>(
-    "/api/admin/calendar/day/close",
+    `/api/admin/calendar/day/close${params.toString() ? `?${params.toString()}` : ""}`,
     {
       method: "POST",
       headers: createAdminHeaders(token),
@@ -222,9 +303,13 @@ export async function closeAdminCalendarDay(
 export async function reopenAdminCalendarDay(
   token: string,
   payload: { date: string },
+  scope?: AdminCalendarScope,
 ) {
+  const params = new URLSearchParams();
+  appendCalendarScope(params, scope);
+
   const response = await apiRequest<AdminCalendarDayActionResponse>(
-    "/api/admin/calendar/day/reopen",
+    `/api/admin/calendar/day/reopen${params.toString() ? `?${params.toString()}` : ""}`,
     {
       method: "POST",
       headers: createAdminHeaders(token),

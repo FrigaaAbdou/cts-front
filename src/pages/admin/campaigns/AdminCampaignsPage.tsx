@@ -78,10 +78,10 @@ const copy = {
     unsavedDialogDescription:
       "Les modifications non enregistrées de cette campagne seront perdues si vous continuez.",
     unsavedDialogAction: "Quitter sans enregistrer",
-    disableDialogTitle: "Confirmer la désactivation",
-    disableDialogDescription:
-      "Cette campagne ne sera plus active ou publiée côté public. Voulez-vous vraiment continuer ?",
-    disableDialogAction: "Confirmer la désactivation",
+    archiveDialogTitle: "Confirmer l’archivage",
+    archiveDialogDescription:
+      "Cette campagne quittera les flux de planification actifs, mais son historique restera conservé pour l’analyse.",
+    archiveDialogAction: "Archiver la campagne",
     selectedCampaign: "Campagne sélectionnée",
     selectedCampaignHint:
       "Vérifiez d'abord l'état de la campagne, puis modifiez son contenu public si nécessaire.",
@@ -348,6 +348,15 @@ function createEmptyCampaignForm(): CampaignFormState {
   };
 }
 
+function buildArchivedCampaignPayload(payload: AdminCampaignPayload): AdminCampaignPayload {
+  return {
+    ...payload,
+    status: "archived",
+    isPublished: false,
+    isActive: false,
+  };
+}
+
 function mapCampaignToForm(item: AdminCampaignItem): CampaignFormState {
   return {
     status: item.status,
@@ -539,8 +548,12 @@ export function AdminCampaignsPage() {
   }
 
   function buildPayload(): AdminCampaignPayload {
+    const shouldForceArchive = form.status === "archived";
+
     return {
       ...form,
+      isPublished: shouldForceArchive ? false : form.isPublished,
+      isActive: shouldForceArchive ? false : form.isActive,
       code: selectedItem ? selectedItem.code : undefined,
       localeContent: {
         fr: {
@@ -559,7 +572,7 @@ export function AdminCampaignsPage() {
     };
   }
 
-  function requiresDisableConfirmation(payload: AdminCampaignPayload) {
+  function requiresArchiveConfirmation(payload: AdminCampaignPayload) {
     if (!selectedItem) {
       return false;
     }
@@ -573,8 +586,8 @@ export function AdminCampaignsPage() {
   async function handleSave() {
     const payload = buildPayload();
 
-    if (requiresDisableConfirmation(payload)) {
-      setPendingSavePayload(payload);
+    if (requiresArchiveConfirmation(payload)) {
+      setPendingSavePayload(buildArchivedCampaignPayload(payload));
       return;
     }
 
@@ -648,9 +661,9 @@ export function AdminCampaignsPage() {
             setPendingSavePayload(null);
           }
         }}
-        title={pageCopy.disableDialogTitle}
-        description={pageCopy.disableDialogDescription}
-        actionLabel={pageCopy.disableDialogAction}
+        title={pageCopy.archiveDialogTitle}
+        description={pageCopy.archiveDialogDescription}
+        actionLabel={pageCopy.archiveDialogAction}
         actionVariant="destructive"
         isSubmitting={isSaving}
         onConfirm={async () => {

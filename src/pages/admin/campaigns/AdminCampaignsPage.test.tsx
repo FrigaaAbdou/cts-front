@@ -66,6 +66,37 @@ describe("AdminCampaignsPage", () => {
     expect(screen.getByText("Campagne actuellement en ligne")).toBeInTheDocument();
   });
 
+  it("keeps archived campaigns visible in the admin list for historical access", async () => {
+    vi.mocked(listAdminCampaigns).mockResolvedValue([
+      {
+        id: "campaign-archived",
+        code: "ARCHIVE-2026",
+        status: "archived",
+        isPublished: false,
+        isActive: false,
+        priority: 40,
+        badgeLabel: "",
+        theme: "community",
+        startDate: "2026-05-01T00:00:00.000Z",
+        endDate: "2026-06-01T00:00:00.000Z",
+        localeContent: {
+          fr: { title: "Campagne archivée", description: "Historique", ctaLabel: "Voir" },
+          ar: null,
+        },
+      },
+    ]);
+
+    render(
+      <MemoryRouter>
+        <AdminCampaignsPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findAllByText("ARCHIVE-2026")).not.toHaveLength(0);
+    expect(screen.getAllByText("Archivée").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Campagne archivée").length).toBeGreaterThan(0);
+  });
+
   it("creates a campaign from the editor form", async () => {
     const user = userEvent.setup();
 
@@ -104,7 +135,7 @@ describe("AdminCampaignsPage", () => {
     });
   });
 
-  it("asks confirmation before disabling an active or published campaign", async () => {
+  it("asks confirmation before archiving an active or published campaign", async () => {
     const user = userEvent.setup();
 
     vi.mocked(listAdminCampaigns).mockResolvedValue([
@@ -128,7 +159,7 @@ describe("AdminCampaignsPage", () => {
     vi.mocked(updateAdminCampaign).mockResolvedValue({
       id: "campaign-1",
       code: "SOLIDARITE-2026",
-      status: "published",
+      status: "archived",
       isPublished: false,
       isActive: false,
       priority: 90,
@@ -154,14 +185,24 @@ describe("AdminCampaignsPage", () => {
     await user.click(screen.getByRole("button", { name: /enregistrer la campagne/i }));
 
     expect(
-      await screen.findByText(/cette campagne ne sera plus active ou publiée/i),
+      await screen.findByText(/cette campagne quittera les flux de planification actifs/i),
     ).toBeInTheDocument();
 
-    await user.click(screen.getByRole("button", { name: /confirmer la désactivation/i }));
+    await user.click(screen.getByRole("button", { name: /archiver la campagne/i }));
 
     await waitFor(() => {
       expect(updateAdminCampaign).toHaveBeenCalled();
     });
+
+    expect(updateAdminCampaign).toHaveBeenCalledWith(
+      "admin-token",
+      "campaign-1",
+      expect.objectContaining({
+        status: "archived",
+        isPublished: false,
+        isActive: false,
+      }),
+    );
   });
 
   it("asks confirmation before discarding campaign edits when switching selection", async () => {
