@@ -53,6 +53,15 @@ export type AdminAppointmentDetail = AdminAppointmentListItem & {
   remarks: string;
   locale: "fr" | "ar";
   updatedAt: string;
+  confirmation?: {
+    publicToken: string;
+    code: string;
+    qrPayloadVersion: string;
+    emailDelivery: "not_attempted" | "sent" | "failed";
+    emailSentAt: string | null;
+    emailError: string | null;
+    smsDelivery: "not_attempted" | "sent" | "failed";
+  };
 };
 
 type AdminAppointmentsListResponse = {
@@ -80,6 +89,15 @@ type AdminAppointmentsBulkStatusResponse = {
     updatedCount: number;
     status: AdminStatusBadgeValue;
     ids: string[];
+  };
+};
+
+type AdminAppointmentScanResponse = {
+  data: {
+    appointmentId: string;
+    confirmationCode: string;
+    status: string;
+    redirectTo: string;
   };
 };
 
@@ -165,6 +183,17 @@ export async function updateAdminAppointmentsStatusBulk(
       method: "PATCH",
       headers: createAdminHeaders(token),
       body: JSON.stringify(input),
+    },
+  );
+
+  return payload.data;
+}
+
+export async function resolveAdminAppointmentScan(token: string, scanToken: string) {
+  const payload = await apiRequest<AdminAppointmentScanResponse>(
+    `/api/admin/appointments/scan/${encodeURIComponent(scanToken)}`,
+    {
+      headers: createAdminHeaders(token),
     },
   );
 

@@ -45,3 +45,17 @@ export type AppointmentSlotsResponse = {
   };
   message: string;
 };
+
+export type AppointmentCreationResponse = {
+  success: true;
+  data: {
+    id: string;
+    status: "pending" | "approved" | "rejected" | "cancelled";
+    appointmentDate: string;
+    appointmentTime: string;
+    createdAt: string;
+    confirmationToken: string;
+    confirmationCode: string;
+  };
+  message: string;
+};

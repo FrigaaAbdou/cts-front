@@ -5,6 +5,7 @@ import {
   RequireAdminGuest,
 } from "../../features/admin-auth/AdminAuthGuards";
 import { AdminAppointmentDetailPage } from "../../pages/admin/appointments/AdminAppointmentDetailPage";
+import { AdminAppointmentScanResolverPage } from "../../pages/admin/appointments/AdminAppointmentScanResolverPage";
 import { AdminAppointmentsListPage } from "../../pages/admin/appointments/AdminAppointmentsListPage";
 import { AdminCampaignsPage } from "../../pages/admin/campaigns/AdminCampaignsPage";
 import { AdminCalendarPage } from "../../pages/admin/calendar/AdminCalendarPage";
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
           { index: true, element: <AdminDashboardPage /> },
           { path: "calendar", element: <AdminCalendarPage /> },
           { path: "appointments", element: <AdminAppointmentsListPage /> },
+          { path: "appointments/scan/:token", element: <AdminAppointmentScanResolverPage /> },
           { path: "appointments/:id", element: <AdminAppointmentDetailPage /> },
           { path: "campaigns", element: <AdminCampaignsPage /> },
           { path: "content", element: <AdminContentPage /> },

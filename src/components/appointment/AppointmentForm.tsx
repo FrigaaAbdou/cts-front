@@ -23,8 +23,10 @@ import {
   getAppointmentFormMeta,
   getAppointmentSlots,
 } from "@/lib/api/appointmentApi";
+import { saveAppointmentConfirmationSnapshot } from "@/lib/appointment/confirmationStorage";
 import { useLocale } from "@/i18n/locale";
 import type { ApiErrorPayload } from "@/lib/api/client";
+import type { AppointmentCreationResponse } from "@/features/appointment/types";
 
 function getFallbackCampaignOptions(locale: "fr" | "ar") {
   return [
@@ -124,6 +126,8 @@ function isAppointmentFormMeta(value: unknown): value is AppointmentFormMeta {
 type AppointmentFormProps = {
   initialCampaignCode?: string;
   onSuccess?: (payload: {
+    confirmationToken: string;
+    confirmationCode: string;
     appointmentDate: string;
     appointmentTime: string;
     firstName: string;
@@ -576,7 +580,7 @@ export function AppointmentForm({ initialCampaignCode, onSuccess }: AppointmentF
       form.clearErrors();
 
       try {
-        await createAppointmentRequest({
+        const response = await createAppointmentRequest({
           ...values,
           lastDonationDate:
             values.isExistingDonor && values.lastDonationDate
@@ -589,13 +593,27 @@ export function AppointmentForm({ initialCampaignCode, onSuccess }: AppointmentF
             values.wilayaCode,
         });
 
-      setSubmitSuccess(copy.success);
-      onSuccess?.({
-        appointmentDate: values.appointmentDate,
-        appointmentTime: values.appointmentTime,
-        firstName: values.firstName,
-        lastName: values.lastName,
-      });
+        const appointmentResponse = response.data as AppointmentCreationResponse["data"];
+
+        saveAppointmentConfirmationSnapshot({
+          appointmentId: appointmentResponse.id,
+          confirmationToken: appointmentResponse.confirmationToken,
+          confirmationCode: appointmentResponse.confirmationCode,
+          appointmentDate: appointmentResponse.appointmentDate,
+          appointmentTime: appointmentResponse.appointmentTime,
+          firstName: values.firstName,
+          lastName: values.lastName,
+        });
+
+        setSubmitSuccess(copy.success);
+        onSuccess?.({
+          confirmationToken: appointmentResponse.confirmationToken,
+          confirmationCode: appointmentResponse.confirmationCode,
+          appointmentDate: appointmentResponse.appointmentDate,
+          appointmentTime: appointmentResponse.appointmentTime,
+          firstName: values.firstName,
+          lastName: values.lastName,
+        });
       } catch (error) {
         const payload = error as Partial<ApiErrorPayload>;
         const fieldErrors =

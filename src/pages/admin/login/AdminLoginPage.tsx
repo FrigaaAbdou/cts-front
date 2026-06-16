@@ -17,6 +17,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
+function buildRedirectPath(
+  from:
+    | {
+        pathname?: string;
+        search?: string;
+        hash?: string;
+      }
+    | undefined,
+) {
+  if (!from?.pathname) {
+    return "/admin";
+  }
+
+  return `${from.pathname}${from.search ?? ""}${from.hash ?? ""}`;
+}
+
 export function AdminLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -28,9 +44,10 @@ export function AdminLoginPage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const redirectTo =
-    (location.state as { from?: { pathname?: string } } | null)?.from?.pathname ??
-    "/admin";
+  const redirectTo = buildRedirectPath(
+    (location.state as { from?: { pathname?: string; search?: string; hash?: string } } | null)
+      ?.from,
+  );
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

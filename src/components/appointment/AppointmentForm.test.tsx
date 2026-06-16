@@ -422,6 +422,8 @@ test("submits successfully with the real backend payload shape", async () => {
       appointmentDate: "2026-06-10",
       appointmentTime: "08:00",
       createdAt: "2026-05-24T00:00:00.000Z",
+      confirmationToken: "token-1",
+      confirmationCode: "CTS-20260610-AB12CD",
     },
     message: "ok",
   });
@@ -456,6 +458,19 @@ test("submits successfully with the real backend payload shape", async () => {
       "Votre demande a été envoyée. Nous vous recontacterons pour confirmation.",
     ),
   ).toBeInTheDocument();
+
+  expect(
+    JSON.parse(
+      window.sessionStorage.getItem("cts-appointment-confirmation") ?? "{}",
+    ),
+  ).toMatchObject({
+    confirmationToken: "token-1",
+    confirmationCode: "CTS-20260610-AB12CD",
+    firstName: "Nadia",
+    lastName: "Dupont",
+    appointmentDate: "2026-06-10",
+    appointmentTime: "08:00",
+  });
 });
 
 test("shows a loading state while the request is pending", async () => {
@@ -487,6 +502,8 @@ test("shows a loading state while the request is pending", async () => {
       appointmentDate: "2026-06-10",
       appointmentTime: "08:00",
       createdAt: "2026-05-24T00:00:00.000Z",
+      confirmationToken: "token-4",
+      confirmationCode: "CTS-20260610-AB12CD",
     },
     message: "ok",
   });
@@ -511,6 +528,8 @@ test("calls onSuccess after a successful submission", async () => {
       appointmentDate: "2026-06-10",
       appointmentTime: "08:00",
       createdAt: "2026-05-24T00:00:00.000Z",
+      confirmationToken: "token-5",
+      confirmationCode: "CTS-20260610-AB12CD",
     },
     message: "ok",
   });
@@ -522,6 +541,8 @@ test("calls onSuccess after a successful submission", async () => {
 
   await waitFor(() =>
     expect(onSuccess).toHaveBeenCalledWith({
+      confirmationToken: "token-5",
+      confirmationCode: "CTS-20260610-AB12CD",
       appointmentDate: "2026-06-10",
       appointmentTime: "08:00",
       firstName: "Nadia",
@@ -542,6 +563,8 @@ test("does not send lastDonationDate for a non-existing donor", async () => {
       appointmentDate: "2026-06-10",
       appointmentTime: "08:00",
       createdAt: "2026-05-24T00:00:00.000Z",
+      confirmationToken: "token-3",
+      confirmationCode: "CTS-20260610-AB12CD",
     },
     message: "ok",
   });
@@ -653,6 +676,8 @@ test("clears stale success state when the user edits the form again", async () =
       appointmentDate: "2026-06-10",
       appointmentTime: "08:00",
       createdAt: "2026-05-24T00:00:00.000Z",
+      confirmationToken: "token-2",
+      confirmationCode: "CTS-20260610-AB12CD",
     },
     message: "ok",
   });

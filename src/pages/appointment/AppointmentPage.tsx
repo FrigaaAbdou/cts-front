@@ -2,6 +2,7 @@ import { PublicLayout } from "@/app/layouts/PublicLayout";
 import { AppointmentForm } from "@/components/appointment/AppointmentForm";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { useLocale } from "@/i18n/locale";
+import type { AppointmentSuccessRouteState } from "@/features/appointment/confirmation.types";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 export function AppointmentPage() {
@@ -43,7 +44,7 @@ export function AppointmentPage() {
             initialCampaignCode={campaignCode}
             onSuccess={(payload) => {
               navigate("/appointment/success", {
-                state: payload,
+                state: payload as AppointmentSuccessRouteState,
               });
             }}
           />

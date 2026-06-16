@@ -11,6 +11,7 @@ import {
   type AdminAppointmentDetail,
 } from "@/lib/api/adminAppointmentsApi";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { donationTypes } from "@/features/appointment/constants/formOptions";
@@ -40,6 +41,16 @@ const copy = {
     lastDonation: "Dernier don",
     eligibility: "Critères d'éligibilité",
     remarks: "Remarques",
+    confirmationBlock: "Confirmation et livraison",
+    confirmationCode: "Code de confirmation",
+    qrToken: "Jeton QR",
+    qrVersion: "Version QR",
+    emailDelivery: "Email",
+    smsDelivery: "SMS",
+    deliveredAt: "Envoyé le",
+    noDeliveryDate: "Non daté",
+    noDeliveryNote: "Aucune erreur enregistrée.",
+    notAttempted: "Non tenté",
     yes: "Oui",
     no: "Non",
     noRemarks: "Aucune remarque transmise.",
@@ -231,11 +242,12 @@ export function AdminAppointmentDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{pageCopy.statusBlock}</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+        <div className="flex flex-col gap-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>{pageCopy.statusBlock}</CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
             <AppointmentStatusActions
               locale={locale}
               role={admin?.role ?? "operator"}
@@ -301,8 +313,76 @@ export function AdminAppointmentDetailPage() {
                 </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>{pageCopy.confirmationBlock}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-4 text-sm text-slate-600">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    {pageCopy.confirmationCode}
+                  </p>
+                  <p className="mt-1 font-medium text-slate-900">
+                    {item.confirmation?.code ?? "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    {pageCopy.qrToken}
+                  </p>
+                  <p className="mt-1 break-all font-medium text-slate-900">
+                    {item.confirmation?.publicToken ?? "-"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    {pageCopy.qrVersion}
+                  </p>
+                  <p className="mt-1 font-medium text-slate-900">
+                    {item.confirmation?.qrPayloadVersion ?? "-"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    {pageCopy.emailDelivery}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <Badge variant="outline" className="rounded-full">
+                      {item.confirmation?.emailDelivery ?? pageCopy.notAttempted}
+                    </Badge>
+                    <span className="text-xs text-slate-400">
+                      {item.confirmation?.emailSentAt ?? pageCopy.noDeliveryDate}
+                    </span>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    {item.confirmation?.emailError ?? pageCopy.noDeliveryNote}
+                  </p>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-400">
+                    {pageCopy.smsDelivery}
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Badge variant="outline" className="rounded-full">
+                      {item.confirmation?.smsDelivery ?? pageCopy.notAttempted}
+                    </Badge>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-500">
+                    {pageCopy.noDeliveryNote}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
       )}
     </div>

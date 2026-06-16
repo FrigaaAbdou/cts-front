@@ -51,6 +51,44 @@ describe("AdminLoginPage", () => {
     expect(await screen.findByText("dashboard")).toBeInTheDocument();
   });
 
+  it("returns the user to the exact scan route after login", async () => {
+    const user = userEvent.setup();
+    loginMock.mockResolvedValue({
+      id: "admin-1",
+      email: "admin@cts.local",
+      role: "manager",
+      isActive: true,
+    });
+
+    render(
+      <MemoryRouter
+        initialEntries={[
+          {
+            pathname: "/admin/login",
+            state: {
+              from: {
+                pathname: "/admin/appointments/scan/public-token-123",
+                search: "?source=qr",
+                hash: "#arrival",
+              },
+            },
+          },
+        ]}
+      >
+        <Routes>
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/appointments/scan/:token" element={<p>scan</p>} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await user.type(screen.getByLabelText("Email"), "admin@cts.local");
+    await user.type(screen.getByLabelText("Mot de passe"), "secret123");
+    await user.click(screen.getByRole("button", { name: /se connecter/i }));
+
+    expect(await screen.findByText("scan")).toBeInTheDocument();
+  });
+
   it("shows a server message when login fails", async () => {
     const user = userEvent.setup();
     loginMock.mockRejectedValue({

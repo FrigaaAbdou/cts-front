@@ -62,6 +62,15 @@ describe("AdminAppointmentDetailPage", () => {
       status: "pending",
       createdAt: "2026-05-28T10:00:00.000Z",
       updatedAt: "2026-05-28T10:00:00.000Z",
+      confirmation: {
+        publicToken: "public-token-123",
+        code: "CTS-20260529-ABC123",
+        qrPayloadVersion: "v1",
+        emailDelivery: "sent",
+        emailSentAt: "2026-05-28T10:01:00.000Z",
+        emailError: null,
+        smsDelivery: "sent",
+      },
       isExistingDonor: false,
       lastDonationDate: null,
       eligibilityChecklist: {
@@ -87,6 +96,8 @@ describe("AdminAppointmentDetailPage", () => {
 
     expect(await screen.findByText("Sara Benali")).toBeInTheDocument();
     expect(screen.getByText("RAS")).toBeInTheDocument();
+    expect(screen.getByText("CTS-20260529-ABC123")).toBeInTheDocument();
+    expect(screen.getAllByText("sent").length).toBeGreaterThan(0);
   });
 
   it("updates the appointment status from the detail view", async () => {
@@ -120,6 +131,15 @@ describe("AdminAppointmentDetailPage", () => {
       status: "pending",
       createdAt: "2026-05-28T10:00:00.000Z",
       updatedAt: "2026-05-28T10:00:00.000Z",
+      confirmation: {
+        publicToken: "public-token-123",
+        code: "CTS-20260529-ABC123",
+        qrPayloadVersion: "v1",
+        emailDelivery: "sent",
+        emailSentAt: "2026-05-28T10:01:00.000Z",
+        emailError: null,
+        smsDelivery: "sent",
+      },
       isExistingDonor: false,
       lastDonationDate: null,
       eligibilityChecklist: {
@@ -159,6 +179,15 @@ describe("AdminAppointmentDetailPage", () => {
       status: "confirmed",
       createdAt: "2026-05-28T10:00:00.000Z",
       updatedAt: "2026-05-28T10:10:00.000Z",
+      confirmation: {
+        publicToken: "public-token-123",
+        code: "CTS-20260529-ABC123",
+        qrPayloadVersion: "v1",
+        emailDelivery: "sent",
+        emailSentAt: "2026-05-28T10:01:00.000Z",
+        emailError: null,
+        smsDelivery: "sent",
+      },
       isExistingDonor: false,
       lastDonationDate: null,
       eligibilityChecklist: {
@@ -225,6 +254,15 @@ describe("AdminAppointmentDetailPage", () => {
       status: "pending",
       createdAt: "2026-05-28T10:00:00.000Z",
       updatedAt: "2026-05-28T10:00:00.000Z",
+      confirmation: {
+        publicToken: "public-token-123",
+        code: "CTS-20260529-ABC123",
+        qrPayloadVersion: "v1",
+        emailDelivery: "sent",
+        emailSentAt: "2026-05-28T10:01:00.000Z",
+        emailError: null,
+        smsDelivery: "sent",
+      },
       isExistingDonor: false,
       lastDonationDate: null,
       eligibilityChecklist: {
@@ -264,6 +302,15 @@ describe("AdminAppointmentDetailPage", () => {
       status: "rejected",
       createdAt: "2026-05-28T10:00:00.000Z",
       updatedAt: "2026-05-28T10:10:00.000Z",
+      confirmation: {
+        publicToken: "public-token-123",
+        code: "CTS-20260529-ABC123",
+        qrPayloadVersion: "v1",
+        emailDelivery: "sent",
+        emailSentAt: "2026-05-28T10:01:00.000Z",
+        emailError: null,
+        smsDelivery: "sent",
+      },
       isExistingDonor: false,
       lastDonationDate: null,
       eligibilityChecklist: {
